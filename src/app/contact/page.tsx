@@ -1,4 +1,3 @@
-// src/app/contact/page.tsx
 import ContactForm from '@/components/ContactForm';
 
 export default function Page() {
