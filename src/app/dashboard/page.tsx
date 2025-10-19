@@ -1,13 +1,16 @@
 'use client';
+export const dynamic = 'force-dynamic';
+
 import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabaseClient';
+import { getSupabase } from '@/lib/supabaseClient';
 
 export default function Dashboard() {
   const [email, setEmail] = useState<string | null>(null);
+  const supabase = getSupabase();
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setEmail(data.user?.email ?? null));
-  }, []);
+  }, [supabase]);
 
   if (!email) return <main className="max-w-2xl">Veuillez vous connecter depuis <a className="underline" href="/auth">/auth</a>.</main>;
 
