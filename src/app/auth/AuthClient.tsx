@@ -7,10 +7,19 @@ import { getSupabase } from '@/lib/supabaseClient';
 export default function AuthClient() {
   const [client, setClient] = useState<ReturnType<typeof getSupabase> | null>(null);
 
+  
+
   useEffect(() => {
-    // Création du client uniquement côté navigateur, après le montage
-    setClient(getSupabase());
-  }, []);
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  console.log('SUPABASE_URL (prod)', url);
+  console.log('HAS_ANON (prod)', !!anon);
+  if (!url || !anon) {
+    console.error('Env vars manquantes côté client. Vérifie Vercel → Environment Variables (Production/Preview).');
+    return; // évite le crash
+  }
+  setClient(getSupabase());
+}, []);
 
   if (!client) {
     return <main className="mx-auto max-w-md p-6">Chargement…</main>;
