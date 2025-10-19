@@ -1,7 +1,6 @@
-import dynamic from 'next/dynamic';
+export const dynamic = 'force-dynamic'; // empêche le pré-rendu statique
 
-// Rend le dashboard uniquement côté client (pas de SSR ni de pré-rendu)
-const DashboardClient = dynamic(() => import('./DashboardClient'), { ssr: false });
+import DashboardClient from './DashboardClient';
 
 export default function Page() {
   return <DashboardClient />;
