@@ -1,3 +1,4 @@
+// src/components/ContactForm.tsx
 'use client';
 import { FormEvent, useState } from 'react';
 
@@ -6,7 +7,7 @@ export default function ContactForm() {
 
   function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    // TODO: envoyer à une route API / emails / service tiers
+    // TODO: appeler une route API ou un service d'email
     setSent(true);
   }
 
