@@ -6,20 +6,26 @@ import { getSupabase } from '@/lib/supabaseClient';
 
 export default function AuthClient() {
   const [client, setClient] = useState<ReturnType<typeof getSupabase> | null>(null);
-
-  
+  const [indisponible, setIndisponible] = useState(false);
 
   useEffect(() => {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  console.log('SUPABASE_URL (prod)', url);
-  console.log('HAS_ANON (prod)', !!anon);
-  if (!url || !anon) {
-    console.error('Env vars manquantes côté client. Vérifie Vercel → Environment Variables (Production/Preview).');
-    return; // évite le crash
+    // Le client Supabase n'est créé qu'une fois monté côté navigateur : les
+    // variables NEXT_PUBLIC_* sont figées dans le bundle au moment du build.
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+      setIndisponible(true);
+      return;
+    }
+    setClient(getSupabase());
+  }, []);
+
+  if (indisponible) {
+    return (
+      <main className="mx-auto max-w-md p-6">
+        L’espace client est temporairement indisponible. Réessayez plus tard ou
+        écrivez-nous via la page <a className="underline" href="/contact">Nous joindre</a>.
+      </main>
+    );
   }
-  setClient(getSupabase());
-}, []);
 
   if (!client) {
     return <main className="mx-auto max-w-md p-6">Chargement…</main>;
