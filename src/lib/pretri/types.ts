@@ -1,0 +1,80 @@
+// Forme du JSON rendu par la fonction SQL public.pretri_chercher(adresse).
+// Une seule source de vérité pour les seuils : la base. Ici, les textes.
+
+export type Categorie =
+  | 'avantageux' | 'conforme' | 'defendable' | 'solide' | 'hors_proportions'
+  | 'batiment_modifie' | 'indeterminable' | 'hors_champ' | 'adresse_partagee' | 'introuvable';
+
+export interface UniteSql {
+  adresse: string;
+  logements: number | null;
+  categorie: string | null;
+  utilisation: string | null;
+  annee_construction: number | null;
+  etages: number | null;
+  division: string | null;
+}
+
+export interface PretriSql {
+  role_libelle: string | null;
+  valeur_precedente: number;
+  valeur_proposee: number;
+  hausse_pct: number;
+  secteur_mediane_pct: number | null;
+  ecart_sigma: number | null;
+  centile: number | null;
+  n_comparables: number | null;
+  comparaison: string | null;
+  batiment_modifie: boolean;
+}
+
+export interface GroupeSql {
+  /** '500 m', '1 km', '5 km' (comparables par distance) ou 'cellule et logements' / 'cellule' (maille de repli). */
+  niveau: string;
+  rayon_m: number | null;
+  division: string;
+  logements: number | null;
+  aire_sujet_m2: number | null;
+  n: number;
+  etages: [number | null, number | null];
+  annees: [number | null, number | null];
+  aire_m2: [number | null, number | null];
+  etendue_m: number | null;
+  rues: string[];
+  /** Hausses du groupe en écarts-types autour de la médiane, par pas de 0,25 σ de −4 à +4. */
+  histogramme: { de: number; a: number; pas: number; comptes: number[]; sous: number; sur: number } | null;
+}
+
+export interface DiagnosticSql {
+  cas: 'format' | 'voie_inconnue' | 'hors_plage' | 'numero_absent';
+  voie?: string;
+  voies_proches?: string[];
+  plage?: [number, number];
+  voisins?: string[];
+}
+
+export interface ResultatSql {
+  trouve: boolean;
+  categorie: Categorie;
+  matricule?: string;
+  unite?: UniteSql;
+  pretri?: PretriSql;
+  rapport_recommande?: boolean;
+  groupe?: GroupeSql | null;
+  n_unites?: number;
+  diagnostic?: DiagnosticSql;
+}
+
+export interface Verdict {
+  categorie: Categorie;
+  trouve: boolean;
+  rapport_recommande: boolean;
+  titre: string;
+  message: string;
+  reserve: string;
+  /** Lignes supplémentaires (voies approchantes, numéros voisins), à afficher en liste. */
+  pistes: string[];
+  unite: UniteSql | null;
+  chiffres: PretriSql | null;
+  groupe: GroupeSql | null;
+}

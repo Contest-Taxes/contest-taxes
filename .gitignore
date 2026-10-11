@@ -42,3 +42,6 @@ next-env.d.ts
 
 # supabase CLI (cache local)
 supabase/.temp/
+
+# configuration locale de l'outil de développement
+.claude/
