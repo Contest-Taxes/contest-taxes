@@ -5,7 +5,7 @@ export default function Home() {
     <div>
       <section className="py-6">
         <p className="text-sm font-medium uppercase tracking-wide text-gray-500">Montréal · rôle 2026-2027-2028</p>
-        <h1 className="mt-2 text-4xl font-bold leading-tight sm:text-5xl">
+        <h1 className="mt-2 text-3xl font-bold leading-tight sm:text-4xl">
           Votre nouvelle évaluation foncière semble-t-elle hors norme?
         </h1>
         <p className="mt-4 max-w-2xl text-lg text-gray-700">

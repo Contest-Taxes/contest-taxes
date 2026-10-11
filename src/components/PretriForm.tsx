@@ -336,7 +336,7 @@ export default function PretriForm() {
                   Poursuivre : nous écrire pour le rapport complet →
                 </a>
                 <p className="mt-2 text-sm text-gray-600">
-                  Le rapport compare votre évaluation aux ventes réelles de votre secteur, celles que la Ville vous affiche. Parcours en ligne à venir.
+                  Le rapport compare votre évaluation aux ventes réelles de votre secteur, celles que la Ville vous affiche. Parcours en ligne et prise de contact à venir.
                 </p>
               </div>
             )}
