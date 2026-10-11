@@ -33,7 +33,9 @@ const Fleche = (
 export default function Home() {
   return (
     <div>
-      <section className="fond-accueil -mx-6 -mt-8 px-6 pb-12 pt-12 sm:pt-16">
+      {/* Pleine largeur : la section sort du conteneur de 1 024 px pour que le
+          dégradé couvre toute la fenêtre, quel que soit l’écran. */}
+      <section className="fond-accueil -mt-8 ml-[calc(50%-50vw)] mr-[calc(50%-50vw)] px-6 pb-12 pt-12 sm:pt-16">
         <div className="mx-auto max-w-5xl">
           <p className="inline-flex items-center gap-2 rounded-full border border-ct-ligne bg-white px-3 py-1 text-xs font-medium uppercase tracking-wide text-ct-gris">
             <span className="h-1.5 w-1.5 rounded-full bg-ct-vert" aria-hidden="true" />

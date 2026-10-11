@@ -37,6 +37,7 @@ body {
   color: var(--foreground);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+  overflow-x: clip; /* les sections pleine largeur (calc(50% - 50vw)) ne doivent pas créer de défilement horizontal */
 }
 
 /* Le fond d'accueil : un dégradé très doux, teinté du vert du logo. */
