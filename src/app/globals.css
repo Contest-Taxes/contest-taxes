@@ -1,26 +1,47 @@
 @import "tailwindcss";
 
+/* Palette tirée du logo : maison verte, flèche rouge, encre du mot-symbole. */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #fafaf8;
+  --foreground: #1e2223;
+  --ct-vert: #367b3a;
+  --ct-vert-fonce: #2a6130;
+  --ct-vert-pale: #e8f3e8;
+  --ct-rouge: #ba2a24;
+  --ct-rouge-pale: #fbeae9;
+  --ct-encre: #1e2223;
+  --ct-gris: #5b6360;
+  --ct-ligne: #e4e6e2;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-ct-vert: var(--ct-vert);
+  --color-ct-vert-fonce: var(--ct-vert-fonce);
+  --color-ct-vert-pale: var(--ct-vert-pale);
+  --color-ct-rouge: var(--ct-rouge);
+  --color-ct-rouge-pale: var(--ct-rouge-pale);
+  --color-ct-encre: var(--ct-encre);
+  --color-ct-gris: var(--ct-gris);
+  --color-ct-ligne: var(--ct-ligne);
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  color-scheme: light;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Le fond d'accueil : un dégradé très doux, teinté du vert du logo. */
+.fond-accueil {
+  background:
+    radial-gradient(60rem 28rem at 10% -10%, rgba(54, 123, 58, 0.13), transparent 60%),
+    radial-gradient(40rem 20rem at 95% 0%, rgba(186, 42, 36, 0.07), transparent 55%);
 }

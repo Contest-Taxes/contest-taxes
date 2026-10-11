@@ -30,7 +30,7 @@ function Declencheur({ sujet, ouvrir, actif, children }: {
       onFocus={() => ouvrir(sujet)}
       onClick={() => ouvrir(sujet, true)}
       aria-expanded={actif}
-      className={`cursor-help rounded-sm underline decoration-dotted decoration-2 underline-offset-4 ${actif ? 'bg-black/5' : ''}`}
+      className={`cursor-help rounded-sm underline decoration-ct-vert decoration-dotted decoration-2 underline-offset-4 ${actif ? 'bg-ct-vert-pale' : ''}`}
     >
       {children}
     </button>
@@ -241,7 +241,7 @@ export default function PretriForm() {
 
   return (
     <div>
-      <form onSubmit={onSubmit} className="flex max-w-2xl flex-col gap-3 sm:flex-row">
+      <form onSubmit={onSubmit} className="flex max-w-2xl flex-col gap-3 rounded-2xl border border-ct-ligne bg-white p-3 shadow-lg shadow-black/5 sm:flex-row">
         <label className="sr-only" htmlFor="adresse">Adresse de l’immeuble</label>
         <input
           id="adresse"
@@ -252,20 +252,20 @@ export default function PretriForm() {
           autoComplete="street-address"
           maxLength={120}
           required
-          className="flex-1 rounded-md border border-gray-300 px-4 py-3 text-lg shadow-sm focus:border-black focus:outline-none"
+          className="flex-1 rounded-xl border border-ct-ligne px-4 py-3 text-lg outline-none transition focus:border-ct-vert focus:ring-2 focus:ring-ct-vert/20"
         />
         <button
           type="submit"
           disabled={chargement}
-          className="rounded-md bg-black px-6 py-3 text-lg font-medium text-white hover:opacity-90 disabled:opacity-50"
+          className="rounded-xl bg-ct-vert px-6 py-3 text-lg font-semibold text-white transition hover:bg-ct-vert-fonce disabled:opacity-50"
         >
           {chargement ? 'Recherche…' : 'Vérifier'}
         </button>
       </form>
-      <p className="mt-2 text-sm text-gray-500">Gratuit, sans compte. Aucune adresse n’est conservée.</p>
+      <p className="mt-3 text-sm text-ct-gris">Gratuit, sans compte. Aucune adresse n’est conservée.</p>
 
       {erreur && (
-        <div role="alert" className="mt-6 max-w-2xl rounded-md border border-red-300 bg-red-50 p-4 text-red-900">
+        <div role="alert" className="mt-6 max-w-2xl rounded-xl border border-red-200 bg-ct-rouge-pale p-4 text-ct-rouge">
           {erreur}
         </div>
       )}
@@ -274,7 +274,7 @@ export default function PretriForm() {
         <div className="mt-6 grid items-start gap-4 lg:grid-cols-[minmax(0,42rem)_minmax(18rem,1fr)]">
           <section
             aria-live="polite"
-            className={`rounded-2xl border p-6 ${TEINTE[verdict.categorie] ?? 'border-gray-200 bg-gray-50'}`}
+            className={`rounded-2xl border p-6 shadow-sm ${TEINTE[verdict.categorie] ?? 'border-ct-ligne bg-white'}`}
           >
             {u && (
               <p className="mb-3 text-sm text-gray-600">
@@ -296,7 +296,7 @@ export default function PretriForm() {
                     <button
                       type="button"
                       onClick={() => suivrePiste(p)}
-                      className="rounded-full border border-gray-400 bg-white px-3 py-1 text-sm hover:bg-gray-100"
+                      className="rounded-full border border-ct-ligne bg-white px-3 py-1 text-sm transition hover:border-ct-vert hover:bg-ct-vert-pale"
                     >
                       {p}
                     </button>
@@ -332,7 +332,7 @@ export default function PretriForm() {
 
             {verdict.rapport_recommande && (
               <div className="mt-6">
-                <a href="/contact" className="inline-block rounded-md bg-black px-5 py-3 font-medium text-white hover:opacity-90">
+                <a href="/contact" className="inline-block rounded-xl bg-ct-vert px-5 py-3 font-semibold text-white transition hover:bg-ct-vert-fonce">
                   Poursuivre : nous écrire pour le rapport complet →
                 </a>
                 <p className="mt-2 text-sm text-gray-600">
@@ -349,7 +349,7 @@ export default function PretriForm() {
 
           {peutExpliquer && (
             <aside
-              className={`rounded-2xl border bg-white p-5 shadow-sm transition-opacity ${panneau ? 'opacity-100' : 'hidden lg:block lg:opacity-60'}`}
+              className={`rounded-2xl border border-ct-ligne bg-white p-5 shadow-sm transition-opacity ${panneau ? 'opacity-100' : 'hidden lg:block lg:opacity-60'}`}
               aria-live="polite"
             >
               {panneau === 'comparables' && g && <PanneauComparables g={g} />}
