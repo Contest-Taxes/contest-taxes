@@ -35,7 +35,7 @@ export default function Home() {
     <div>
       {/* Pleine largeur : la section sort du conteneur de 1 024 px pour que le
           dégradé couvre toute la fenêtre, quel que soit l’écran. */}
-      <section className="fond-accueil -mt-8 ml-[calc(50%-50vw)] mr-[calc(50%-50vw)] pb-12 pt-12 sm:pt-16">
+      <section className="fond-accueil -mt-8 ml-[calc(50%-50vw)] mr-[calc(50%-50vw)] pb-6 pt-12 sm:pt-16">
         {/* même conteneur que <main> (max-w-5xl + px-6) : le formulaire et les cartes partagent le même bord gauche */}
         <div className="mx-auto max-w-5xl px-6">
           <p className="inline-flex items-center gap-2 rounded-full border border-ct-ligne bg-white px-3 py-1 text-xs font-medium uppercase tracking-wide text-ct-gris">
@@ -57,7 +57,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="mt-12 grid gap-5 sm:grid-cols-3">
+      <section className="mt-4 grid gap-5 sm:grid-cols-3">
         <Carte titre="Ce que ce tri regarde" icone={Loupe}>
           Les valeurs inscrites aux deux derniers rôles pour 371 000 immeubles résidentiels
           de 1 à 5 logements, publiées par le ministère des Affaires municipales. Votre hausse
