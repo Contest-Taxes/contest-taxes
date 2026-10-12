@@ -45,7 +45,7 @@ export default function Home() {
           <h1 className="mt-4 max-w-3xl text-3xl font-bold leading-tight tracking-tight sm:text-4xl">
             Votre nouvelle évaluation foncière semble-t-elle hors norme?
           </h1>
-          <p className="mt-4 max-w-2xl text-lg leading-relaxed text-ct-gris">
+          <p className="mt-4 max-w-2xl text-justify text-lg leading-relaxed text-ct-gris hyphens-auto" lang="fr">
             Entrez votre adresse. En une seconde, nous comparons la hausse imposée à votre
             immeuble à celle de ses bâtiments comparables — même voisinage, taille et nombre
             de logements voisins — et nous vous disons honnêtement s’il vaut la peine
