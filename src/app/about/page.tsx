@@ -2,12 +2,12 @@ import Image from 'next/image';
 
 export default function Page() {
   return (
-    <article className="max-w-3xl">
+    <article>
       <div className="flex items-center gap-4">
         <Image src="/logo-icone.png" alt="" width={72} height={56} className="h-14 w-auto" />
         <h1 className="text-3xl font-bold tracking-tight">Qui sommes-nous</h1>
       </div>
-      <p className="mt-6 text-lg leading-relaxed text-ct-gris">
+      <p className="mt-6 text-justify text-lg leading-relaxed text-ct-gris hyphens-auto" lang="fr">
         Contest-Taxes est un service d’analyse qui met en forme les ventes comparables fournies
         par la Ville pour produire un rapport clair et exploitable lors d’une demande de révision
         de l’évaluation foncière.
@@ -20,7 +20,7 @@ export default function Page() {
         ].map(([t, d]) => (
           <div key={t} className="rounded-2xl border border-ct-ligne bg-white p-5 shadow-sm">
             <h2 className="font-semibold">{t}</h2>
-            <p className="mt-2 text-sm leading-relaxed text-ct-gris">{d}</p>
+            <p className="mt-2 text-justify text-sm leading-relaxed text-ct-gris hyphens-auto" lang="fr">{d}</p>
           </div>
         ))}
       </div>

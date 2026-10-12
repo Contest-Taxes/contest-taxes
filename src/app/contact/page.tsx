@@ -2,9 +2,9 @@ import Link from 'next/link';
 
 export default function Page() {
   return (
-    <section className="max-w-xl">
+    <section className="max-w-2xl">
       <h1 className="text-3xl font-bold tracking-tight">Nous joindre</h1>
-      <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-6 leading-relaxed shadow-sm">
+      <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-6 text-justify leading-relaxed shadow-sm hyphens-auto" lang="fr">
         <p className="font-medium">Le formulaire de contact n’est pas encore en service.</p>
         <p className="mt-2 text-ct-encre">
           Contest-Taxes est en cours de mise en place. L’adresse courriel officielle sera
