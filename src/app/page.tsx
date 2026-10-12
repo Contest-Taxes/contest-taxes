@@ -9,7 +9,7 @@ function Carte({ titre, children, icone }: { titre: string; children: React.Reac
         </span>
         <h2 className="font-semibold">{titre}</h2>
       </div>
-      <p className="mt-3 text-sm leading-relaxed text-ct-gris">{children}</p>
+      <p className="mt-3 text-justify text-sm leading-relaxed text-ct-gris hyphens-auto" lang="fr">{children}</p>
     </div>
   );
 }
@@ -35,8 +35,9 @@ export default function Home() {
     <div>
       {/* Pleine largeur : la section sort du conteneur de 1 024 px pour que le
           dégradé couvre toute la fenêtre, quel que soit l’écran. */}
-      <section className="fond-accueil -mt-8 ml-[calc(50%-50vw)] mr-[calc(50%-50vw)] px-6 pb-12 pt-12 sm:pt-16">
-        <div className="mx-auto max-w-5xl">
+      <section className="fond-accueil -mt-8 ml-[calc(50%-50vw)] mr-[calc(50%-50vw)] pb-12 pt-12 sm:pt-16">
+        {/* même conteneur que <main> (max-w-5xl + px-6) : le formulaire et les cartes partagent le même bord gauche */}
+        <div className="mx-auto max-w-5xl px-6">
           <p className="inline-flex items-center gap-2 rounded-full border border-ct-ligne bg-white px-3 py-1 text-xs font-medium uppercase tracking-wide text-ct-gris">
             <span className="h-1.5 w-1.5 rounded-full bg-ct-vert" aria-hidden="true" />
             Montréal · rôle 2026-2027-2028
