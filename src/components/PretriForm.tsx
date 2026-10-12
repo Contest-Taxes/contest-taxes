@@ -2,6 +2,7 @@
 import { FormEvent, ReactNode, useState } from 'react';
 import type { GroupeSql, Verdict } from '@/lib/pretri/types';
 import CourbeSigma, { COMPS, LEGENDE_SIGMA, formaterUneSur, partObservee, uneSur } from '@/components/CourbeSigma';
+import CourbeHistorique from '@/components/CourbeHistorique';
 
 const TEINTE: Record<string, string> = {
   avantageux: 'border-emerald-200 bg-emerald-50',
@@ -328,6 +329,20 @@ export default function PretriForm() {
 
             {verdict.reserve && (
               <p className="mt-5 border-t border-black/10 pt-4 text-sm text-gray-700">{verdict.reserve}</p>
+            )}
+
+            {verdict.historique.length >= 1 && (
+              <div className="mt-5 border-t border-black/10 pt-4">
+                <h3 className="font-semibold">Votre immeuble au fil des rôles</h3>
+                <div className="mt-2 rounded-xl border border-ct-ligne bg-white p-2">
+                  <CourbeHistorique historique={verdict.historique} />
+                </div>
+                <p className="mt-2 text-xs leading-relaxed text-ct-gris">
+                  Valeurs inscrites à la fin de chaque rôle, après révisions. Une évaluation se conteste au dépôt de chaque
+                  nouveau rôle, dans les délais prévus : suivre cette courbe tous les trois ans, c’est ne pas laisser passer
+                  le moment où une hausse hors norme peut encore être revue.
+                </p>
+              </div>
             )}
 
             {verdict.rapport_recommande && (

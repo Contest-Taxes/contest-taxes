@@ -50,6 +50,15 @@ export async function POST(req: Request) {
   const resultat = data as ResultatSql;
   const v = verdict(resultat, adresse);
 
+  // L'immeuble au fil des rôles : transitions antérieures (table compacte) et courante.
+  if (resultat?.matricule && (resultat.trouve || resultat.categorie === 'hors_champ')) {
+    const { data: h, error: erreurH } = await sb.rpc('pretri_historique_de', {
+      p_ville: '66023', p_matricule: resultat.matricule, p_millesime: 2026,
+    });
+    if (erreurH) console.error('pretri_historique_de :', erreurH.message);
+    else if (Array.isArray(h)) v.historique = h;
+  }
+
   const { data: journal, error: erreurJournal } = await sb.rpc('pretri_journaliser', {
     p_ip_hash: empreinteIp(req),
     p_categorie: v.categorie,

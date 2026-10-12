@@ -65,6 +65,19 @@ export interface ResultatSql {
   diagnostic?: DiagnosticSql;
 }
 
+export interface TransitionSql {
+  millesime: number;
+  role_libelle: string | null;
+  valeur_avant: number | null;
+  valeur_apres: number | null;
+  hausse_pct: number | null;
+  mediane_pct: number | null;
+  ecart_sigma: number | null;
+  n_comparables: number | null;
+  rayon_m: number | null;
+  batiment_modifie: boolean;
+}
+
 export interface Verdict {
   categorie: Categorie;
   trouve: boolean;
@@ -77,4 +90,6 @@ export interface Verdict {
   unite: UniteSql | null;
   chiffres: PretriSql | null;
   groupe: GroupeSql | null;
+  /** Transitions de rôle de l'immeuble, de la plus ancienne à la plus récente (courante comprise). */
+  historique: TransitionSql[];
 }

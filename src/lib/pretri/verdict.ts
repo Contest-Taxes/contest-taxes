@@ -36,6 +36,7 @@ function base(r: ResultatSql, categorie: Categorie): Verdict {
     unite: r.unite ?? null,
     chiffres: r.pretri ?? null,
     groupe: r.groupe ?? null,
+    historique: [],
   };
 }
 
