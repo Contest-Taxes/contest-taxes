@@ -100,20 +100,27 @@ export default function Page() {
       <p className="mt-6 text-justify text-lg leading-relaxed text-ct-gris hyphens-auto" lang="fr">
         Contest-Taxes est un service d’analyse qui met en forme les ventes comparables fournies
         par la Ville pour produire un rapport clair et exploitable lors d’une demande de révision
-        de l’évaluation foncière.
+        de l’évaluation foncière. Nous ne sommes pas évaluateurs agréés : nos analyses informent et
+        outillent, elles ne remplacent pas une opinion de valeur.
       </p>
-      <div className="mt-8 grid gap-5 sm:grid-cols-3">
-        {[
-          ['Transparence', 'Chaque chiffre du rapport se recalcule à partir de données publiques, et la méthode est celle que la Ville décrit elle-même.'],
-          ['Honnêteté', 'Le pré-tri gratuit dit à la plupart des propriétaires qu’ils n’ont pas de cause. Nous ne vendons pas de rapport à qui n’en a pas besoin.'],
-          ['Limites assumées', 'Nous ne sommes pas évaluateurs agréés. Nos analyses informent et outillent ; elles ne remplacent pas une opinion de valeur.'],
-        ].map(([t, d]) => (
-          <div key={t} className="rounded-2xl border border-ct-ligne bg-white p-5 shadow-sm">
-            <h2 className="font-semibold">{t}</h2>
-            <p className="mt-2 text-justify text-sm leading-relaxed text-ct-gris hyphens-auto" lang="fr">{d}</p>
-          </div>
-        ))}
-      </div>
+
+      <section className="mt-10" aria-labelledby="qui-est-derriere">
+        <h2 id="qui-est-derriere" className="text-2xl font-bold tracking-tight">
+          Qui est derrière Contest-Taxes
+        </h2>
+        <p className="mt-4 text-justify leading-relaxed text-ct-gris hyphens-auto" lang="fr">
+          Contest-Taxes a été fondé par Guillaume Lenoir-Craig, astrophysicien et professeur de physique
+          au collégial. L’idée est née d’une expérience familiale. Au dépôt du rôle de 2023, l’évaluation
+          de l’immeuble de sa mère, un immeuble de cinq logements, a été haussée de 48&nbsp;%, bien plus
+          que celle des immeubles voisins. Il a monté le dossier lui-même, à partir de 18 ventes
+          d’immeubles comparables de l’année de référence et des données publiques. La municipalité a
+          d’abord ramené la hausse à 26&nbsp;%. La conciliation devant le Tribunal administratif du Québec
+          l’a ensuite fixée à 19,5&nbsp;%. Chaque dossier est différent, et la plupart des évaluations
+          sont dans la norme. Mais quand elles ne le sont pas, la démarche existe, et elle fonctionne.
+          Contest-Taxes la reprend, avec les outils statistiques de son métier, pour que n’importe quel
+          propriétaire puisse d’abord vérifier, puis agir s’il y a lieu.
+        </p>
+      </section>
 
       <section className="mt-12" aria-labelledby="pourquoi-le-nom">
         <h2 id="pourquoi-le-nom" className="text-2xl font-bold tracking-tight">
@@ -150,24 +157,6 @@ export default function Page() {
             </li>
           ))}
         </ol>
-      </section>
-
-      <section className="mt-12" aria-labelledby="qui-est-derriere">
-        <h2 id="qui-est-derriere" className="text-2xl font-bold tracking-tight">
-          Qui est derrière Contest-Taxes
-        </h2>
-        <p className="mt-4 text-justify leading-relaxed text-ct-gris hyphens-auto" lang="fr">
-          Contest-Taxes a été fondé par Guillaume Lenoir-Craig, astrophysicien et professeur de physique
-          au collégial. L’idée est née d’une expérience familiale. Au dépôt du rôle de 2023, l’évaluation
-          de l’immeuble de sa mère, un immeuble de cinq logements, a été haussée de 48&nbsp;%, bien plus
-          que celle des immeubles voisins. Il a monté le dossier lui-même, à partir de 18 ventes
-          d’immeubles comparables de l’année de référence et des données publiques. La municipalité a
-          d’abord ramené la hausse à 26&nbsp;%. La conciliation devant le Tribunal administratif du Québec
-          l’a ensuite fixée à 19,5&nbsp;%. Chaque dossier est différent, et la plupart des évaluations
-          sont dans la norme. Mais quand elles ne le sont pas, la démarche existe, et elle fonctionne.
-          Contest-Taxes la reprend, avec les outils statistiques de son métier, pour que n’importe quel
-          propriétaire puisse d’abord vérifier, puis agir s’il y a lieu.
-        </p>
       </section>
     </article>
   );
