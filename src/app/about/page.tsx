@@ -151,6 +151,24 @@ export default function Page() {
           ))}
         </ol>
       </section>
+
+      <section className="mt-12" aria-labelledby="qui-est-derriere">
+        <h2 id="qui-est-derriere" className="text-2xl font-bold tracking-tight">
+          Qui est derrière Contest-Taxes
+        </h2>
+        <p className="mt-4 text-justify leading-relaxed text-ct-gris hyphens-auto" lang="fr">
+          Contest-Taxes a été fondé par Guillaume Lenoir-Craig, astrophysicien et professeur de physique
+          au collégial. L’idée est née d’une expérience familiale. Au dépôt du rôle de 2023, l’évaluation
+          de l’immeuble de sa mère, un immeuble de cinq logements, a été haussée de 48&nbsp;%, bien plus
+          que celle des immeubles voisins. Il a monté le dossier lui-même, à partir de 18 ventes
+          d’immeubles comparables de l’année de référence et des données publiques. La municipalité a
+          d’abord ramené la hausse à 26&nbsp;%. La conciliation devant le Tribunal administratif du Québec
+          l’a ensuite fixée à 19,5&nbsp;%. Chaque dossier est différent, et la plupart des évaluations
+          sont dans la norme. Mais quand elles ne le sont pas, la démarche existe, et elle fonctionne.
+          Contest-Taxes la reprend, avec les outils statistiques de son métier, pour que n’importe quel
+          propriétaire puisse d’abord vérifier, puis agir s’il y a lieu.
+        </p>
+      </section>
     </article>
   );
 }
