@@ -4,9 +4,11 @@
 export type Categorie =
   | 'avantageux' | 'conforme' | 'defendable' | 'solide' | 'hors_proportions'
   | 'batiment_modifie' | 'indeterminable' | 'hors_champ' | 'adresse_partagee' | 'introuvable'
-  | 'ville_inconnue' | 'ville_non_couverte';
+  | 'ville_inconnue' | 'ville_non_couverte' | 'adresse_ambigue';
 
 export interface UniteSql {
+  /** Code géographique MAMH de la ville (66023 = Montréal). */
+  ville?: string | null;
   adresse: string;
   logements: number | null;
   categorie: string | null;
@@ -31,6 +33,16 @@ export interface PretriSql {
   sigma_plancher?: boolean;
   arrondissement?: string | null;
   taux?: TauxSql | null;
+}
+
+export interface CouvertureSql {
+  ville: string;
+  nom: string;
+  millesime: number;
+  role_libelle: string | null;
+  apercu: boolean;
+  note: string | null;
+  immeubles?: number;
 }
 
 export interface TauxSql {
@@ -82,6 +94,10 @@ export interface ResultatSql {
   /** Ville nommée après la virgule, quand elle est inconnue ou pas encore couverte. */
   ville?: string;
   ville_code?: string;
+  /** Villes chargées qui contiennent toutes cette adresse (catégorie adresse_ambigue). */
+  villes?: string[];
+  /** Table consultée : ville, rôle, et si c'est un aperçu (période de révision close). */
+  couverture?: CouvertureSql | null;
   diagnostic?: DiagnosticSql;
 }
 
@@ -115,4 +131,5 @@ export interface Verdict {
   /** Ce qu'un point de hausse coûte en taxes, au taux de l'immeuble, avec sa source. */
   enjeu: string;
   taux: TauxSql | null;
+  couverture: CouvertureSql | null;
 }

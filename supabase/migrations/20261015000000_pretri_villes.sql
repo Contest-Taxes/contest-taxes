@@ -47,7 +47,7 @@ begin
   if coalesce(array_length(parts, 1), 0) >= 2 then
     for i in 2..array_length(parts, 1) loop
       p := btrim(parts[i]);
-      if p <> '' and lower(extensions.unaccent(p)) not in ('qc', 'quebec', 'canada', 'ca') then
+      if p <> '' and lower(extensions.unaccent(p)) not in ('qc', 'canada', 'ca') then   -- « Québec » seul = la ville de Québec
         ville_saisie := p; exit;
       end if;
     end loop;

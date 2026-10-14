@@ -76,6 +76,7 @@ function base(r: ResultatSql, categorie: Categorie): Verdict {
     historique: [],
     enjeu: '',
     taux: r.pretri?.taux ?? null,
+    couverture: r.couverture ?? null,
   };
 }
 
@@ -90,21 +91,20 @@ function introuvable(r: ResultatSql, adresse: string): Verdict {
         v.pistes = d.voies_proches;
       } else {
         v.message =
-          `Aucune voie ne correspond à « ${d.voie} » dans l'agglomération de Montréal. ` +
-          `Ce tri ne couvre pour l'instant que Montréal ; si l'immeuble est ailleurs au ` +
-          `Québec, écrivez-nous.`;
+          `Aucune voie ne correspond à « ${d.voie} » à ${r.couverture?.nom ?? 'Montréal'}. ` +
+          `Si l'immeuble est dans une autre ville, ajoutez-la après une virgule.`;
       }
       break;
     case 'hors_plage':
       v.message =
-        `La voie « ${d.voie} » existe à Montréal, mais ses numéros civiques vont de ` +
+        `La voie « ${d.voie} » existe à ${r.couverture?.nom ?? 'Montréal'}, mais ses numéros civiques vont de ` +
         `${d.plage?.[0]} à ${d.plage?.[1]}. Le numéro demandé est hors de cette plage : ` +
-        `l'adresse appartient probablement à une autre municipalité du Québec. Ce tri ne ` +
-        `couvre pour l'instant que l'agglomération de Montréal.`;
+        `l'adresse appartient probablement à une autre municipalité. Si c'est le cas, ` +
+        `ajoutez la ville après une virgule.`;
       break;
     case 'numero_absent':
       v.message =
-        `La voie « ${d.voie} » existe à Montréal (numéros de ${d.plage?.[0]} à ` +
+        `La voie « ${d.voie} » existe à ${r.couverture?.nom ?? 'Montréal'} (numéros de ${d.plage?.[0]} à ` +
         `${d.plage?.[1]}), mais aucune unité d'évaluation ne porte ce numéro. Numéros ` +
         `voisins présents :`;
       v.pistes = d.voisins ?? [];
@@ -137,8 +137,16 @@ function calculer(r: ResultatSql, adresseSaisie: string): Verdict {
     const v = base(r, 'ville_non_couverte');
     v.titre = "Cette ville n'est pas encore couverte";
     v.message =
-      `Contest-Taxes couvre pour l'instant Montréal, rôle 2026-2027-2028. ` +
-      `${r.ville ?? 'Cette ville'} suivra au dépôt de son prochain rôle d'évaluation.`;
+      `${r.ville ?? 'Cette ville'} n'est pas encore dans notre base. Elle suivra au dépôt ` +
+      `de son prochain rôle d'évaluation ; les villes couvertes sont indiquées sur la page d'accueil.`;
+    return v;
+  }
+  if (r && r.categorie === 'adresse_ambigue') {
+    const v = base(r, 'adresse_ambigue');
+    v.titre = 'Cette adresse existe dans plusieurs villes';
+    v.message =
+      `Nous la trouvons à ${(r.villes ?? []).join(' et à ')}. Précisez la ville après une ` +
+      `virgule, par exemple « ${adresseSaisie}, ${r.villes?.[0] ?? 'Montréal'} ».`;
     return v;
   }
   if (!r || r.categorie === 'introuvable') return introuvable(r, adresseSaisie);

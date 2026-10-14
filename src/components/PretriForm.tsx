@@ -298,6 +298,11 @@ export default function PretriForm() {
                 {u.categorie && u.categorie !== 'Régulier' && ` · ${u.categorie}`}
               </p>
             )}
+            {verdict.couverture?.apercu && verdict.couverture.note && (
+              <div className="mb-4 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm leading-relaxed text-amber-950" role="note">
+                {verdict.couverture.note}
+              </div>
+            )}
             <h2 className="text-2xl font-semibold">{verdict.titre}</h2>
             {peutExpliquer
               ? <MessageAvecDeclencheurs texte={verdict.message} ouvrir={ouvrir} actif={panneau} />

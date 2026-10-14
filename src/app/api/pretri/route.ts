@@ -53,7 +53,8 @@ export async function POST(req: Request) {
   // L'immeuble au fil des rôles : transitions antérieures (table compacte) et courante.
   if (resultat?.matricule && (resultat.trouve || resultat.categorie === 'hors_champ')) {
     const { data: h, error: erreurH } = await sb.rpc('pretri_historique_de', {
-      p_ville: '66023', p_matricule: resultat.matricule, p_millesime: 2026,
+      p_ville: resultat.couverture?.ville ?? '66023', p_matricule: resultat.matricule,
+      p_millesime: resultat.couverture?.millesime ?? 2026,
     });
     if (erreurH) console.error('pretri_historique_de :', erreurH.message);
     else if (Array.isArray(h)) v.historique = h;
