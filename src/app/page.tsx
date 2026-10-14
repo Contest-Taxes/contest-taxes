@@ -51,7 +51,12 @@ export default function Home() {
             de logements voisins — et nous vous disons honnêtement si elle sort de
             l’ordinaire.
           </p>
-          <div className="mt-8">
+          <p className="mt-3 text-sm text-ct-gris">
+            Couvre pour l’instant <strong>Montréal</strong>, rôle 2026-2027-2028. Les autres
+            grandes villes du Québec suivront au dépôt de leur prochain rôle. Ajoutez la ville
+            après une virgule pour lever tout doute : « 1001 rue Notre-Dame Est, Montréal ».
+          </p>
+          <div className="mt-6">
             <PretriForm />
           </div>
         </div>
@@ -61,8 +66,7 @@ export default function Home() {
         <Carte titre="Ce que ce tri regarde" icone={Loupe}>
           Les valeurs inscrites aux deux derniers rôles pour 371 000 immeubles résidentiels
           de 1 à 5 logements, publiées par le ministère des Affaires municipales. Votre hausse
-          est située parmi celles des bâtiments comparables à moins de 500 m : nombre de
-          logements à un près, aire d’étages à 20 % près.
+          est située parmi celles des bâtiments comparables à moins de 500 m du vôtre.
         </Carte>
         <Carte titre="Ce qu’il ne voit pas" icone={Oeil}>
           « Dans la norme » veut dire « rien d’inhabituel par rapport à vos voisins », pas
@@ -71,8 +75,8 @@ export default function Home() {
         </Carte>
         <Carte titre="Et ensuite" icone={Fleche}>
           Une demande de révision s’appuie sur les prix de vente de propriétés comparables,
-          pas sur les valeurs au rôle des voisins : la Ville l’indique elle-même. C’est
-          l’analyse que fait le rapport complet, à partir des ventes qu’elle vous affiche.
+          pas sur les valeurs au rôle des voisins : les municipalités l’indiquent elles-mêmes.
+          C’est l’analyse que fait le rapport complet, à partir des ventes de votre secteur.
         </Carte>
       </section>
 

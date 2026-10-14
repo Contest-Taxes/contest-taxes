@@ -124,6 +124,23 @@ export function verdict(r: ResultatSql, adresseSaisie: string): Verdict {
 }
 
 function calculer(r: ResultatSql, adresseSaisie: string): Verdict {
+  if (r && r.categorie === 'ville_inconnue') {
+    const v = base(r, 'ville_inconnue');
+    v.titre = 'Municipalité non reconnue';
+    v.message =
+      `Nous ne reconnaissons pas la municipalité « ${r.ville ?? ''} ». Vérifiez ` +
+      `l'orthographe, ou entrez l'adresse sans la ville si l'immeuble est ` +
+      `à Montréal.`;
+    return v;
+  }
+  if (r && r.categorie === 'ville_non_couverte') {
+    const v = base(r, 'ville_non_couverte');
+    v.titre = "Cette ville n'est pas encore couverte";
+    v.message =
+      `Contest-Taxes couvre pour l'instant Montréal, rôle 2026-2027-2028. ` +
+      `${r.ville ?? 'Cette ville'} suivra au dépôt de son prochain rôle d'évaluation.`;
+    return v;
+  }
   if (!r || r.categorie === 'introuvable') return introuvable(r, adresseSaisie);
 
   if (r.categorie === 'adresse_partagee') {

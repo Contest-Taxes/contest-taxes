@@ -3,7 +3,8 @@
 
 export type Categorie =
   | 'avantageux' | 'conforme' | 'defendable' | 'solide' | 'hors_proportions'
-  | 'batiment_modifie' | 'indeterminable' | 'hors_champ' | 'adresse_partagee' | 'introuvable';
+  | 'batiment_modifie' | 'indeterminable' | 'hors_champ' | 'adresse_partagee' | 'introuvable'
+  | 'ville_inconnue' | 'ville_non_couverte';
 
 export interface UniteSql {
   adresse: string;
@@ -78,6 +79,9 @@ export interface ResultatSql {
   rapport_recommande?: boolean;
   groupe?: GroupeSql | null;
   n_unites?: number;
+  /** Ville nommée après la virgule, quand elle est inconnue ou pas encore couverte. */
+  ville?: string;
+  ville_code?: string;
   diagnostic?: DiagnosticSql;
 }
 

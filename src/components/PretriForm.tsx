@@ -262,7 +262,7 @@ export default function PretriForm() {
           name="adresse"
           value={adresse}
           onChange={(e) => setAdresse(e.target.value)}
-          placeholder="Ex. : 1482 Rue Marie-Anne Est"
+          placeholder="Ex. : 1482 Rue Marie-Anne Est, Montréal"
           autoComplete="street-address"
           maxLength={120}
           required
@@ -394,7 +394,8 @@ export default function PretriForm() {
             )}
 
             {(verdict.categorie === 'hors_champ' || verdict.categorie === 'adresse_partagee' ||
-              verdict.categorie === 'batiment_modifie' || verdict.categorie === 'indeterminable') && (
+              verdict.categorie === 'batiment_modifie' || verdict.categorie === 'indeterminable' ||
+              verdict.categorie === 'ville_non_couverte') && (
               <p className="mt-5"><a href="/contact" className="underline">Nous joindre →</a></p>
             )}
           </section>
