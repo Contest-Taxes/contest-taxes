@@ -200,9 +200,13 @@ function calculer(r: ResultatSql, adresseSaisie: string): Verdict {
       `${commun} ${marge} Sur le seul critère de la valeur, rien ne distingue ` +
       `votre évaluation de celles de vos comparables.`;
     v.reserve =
-      "Restent d'autres motifs, indépendants de la valeur : une erreur de superficie, " +
-      "de nombre de logements ou d'usage inscrit au rôle peut aussi faire l'objet " +
-      "d'une demande de révision, et se vérifie sur votre avis d'évaluation.";
+      "Ce tri ne regarde que la valeur par rapport aux comparables. L'état et les " +
+      "particularités de votre immeuble entrent aussi dans son évaluation : une " +
+      "conduite d'égout à remplacer ou des fondations à stabiliser, par exemple, " +
+      "pèsent sur sa valeur réelle. Les chiffrer est le travail d'un évaluateur " +
+      "agréé, pas le nôtre, mais ce sont des éléments qui peuvent être présentés à " +
+      "l'évaluateur de la Ville lors d'une demande de révision, ou au Tribunal " +
+      "administratif du Québec.";
     return v;
   }
 
