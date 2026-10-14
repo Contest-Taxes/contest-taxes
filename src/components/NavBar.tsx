@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 
 const links = [
   { href: '/', label: 'Pré-tri' },
+  { href: '/mission', label: 'Notre mission' },
   { href: '/about', label: 'Qui sommes-nous' },
   { href: '/contact', label: 'Nous joindre' },
 ];

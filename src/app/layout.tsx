@@ -26,6 +26,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <span>© {new Date().getFullYear()} Contest-Taxes — Tous droits réservés</span>
             </div>
             <nav className="flex gap-5">
+              <Link href="/mission" className="hover:text-ct-encre">Notre mission</Link>
               <Link href="/about" className="hover:text-ct-encre">Qui sommes-nous</Link>
               <Link href="/contact" className="hover:text-ct-encre">Nous joindre</Link>
             </nav>

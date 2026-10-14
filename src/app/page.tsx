@@ -84,7 +84,7 @@ export default function Home() {
         <p>
           Source : rôles d’évaluation foncière du Québec (MAMH, licence CC-BY 4.0) et données
           ouvertes de la Ville de Montréal. Contest-Taxes n’est pas un évaluateur agréé ; ce tri
-          est un outil d’information, pas une opinion de valeur.
+          est un outil d’information, pas une évaluation professionnelle.
         </p>
       </section>
     </div>

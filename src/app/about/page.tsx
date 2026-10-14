@@ -98,10 +98,9 @@ export default function Page() {
         <h1 className="text-3xl font-bold tracking-tight">Qui sommes-nous</h1>
       </div>
       <p className="mt-6 text-justify text-lg leading-relaxed text-ct-gris hyphens-auto" lang="fr">
-        Contest-Taxes est un service d’analyse qui met en forme les ventes comparables fournies
-        par la Ville pour produire un rapport clair et exploitable lors d’une demande de révision
-        de l’évaluation foncière. Nous ne sommes pas évaluateurs agréés : nos analyses informent et
-        outillent, elles ne remplacent pas une opinion de valeur.
+        Contest-Taxes est une entreprise québécoise indépendante, née d’une contestation menée en
+        famille. Nous ne sommes pas évaluateurs agréés : nos analyses informent et outillent, elles ne
+        remplacent pas une évaluation professionnelle.
       </p>
 
       <section className="mt-10" aria-labelledby="qui-est-derriere">
