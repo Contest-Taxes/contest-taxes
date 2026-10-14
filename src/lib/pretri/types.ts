@@ -33,6 +33,8 @@ export interface GroupeSql {
   niveau: string;
   rayon_m: number | null;
   division: string;
+  /** Classe du sujet et de ses comparables : condo, maison (1 logement) ou plex (2 et plus) ; nul pour les tables d'avant 2026-10-13. */
+  classe: 'condo' | 'maison' | 'plex' | null;
   logements: number | null;
   aire_sujet_m2: number | null;
   n: number;

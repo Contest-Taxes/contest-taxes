@@ -72,20 +72,33 @@ function PanneauComparables({ g }: { g: GroupeSql }) {
   const annees = plage(g.annees, '', true);
   const aire = plage(g.aire_m2, ' m²');
   const rayon = g.rayon_m != null ? (g.rayon_m >= 1000 ? `${g.rayon_m / 1000} km` : `${g.rayon_m} m`) : null;
-  const logMin = g.logements != null ? Math.max(1, g.logements - 1) : null;
+  const plancher = g.classe === 'plex' ? 2 : 1;
+  const logMin = g.logements != null ? Math.max(plancher, g.logements - 1) : null;
   const logMax = g.logements != null ? Math.min(5, g.logements + 1) : null;
+  const mentionLogements = g.classe == null || g.classe === 'plex' || (g.logements ?? 1) > 1;
+  const quoi = g.classe === 'maison' ? 'maisons unifamiliales'
+    : g.classe === 'condo' ? 'condos'
+    : g.classe === 'plex' ? 'plex'
+    : 'bâtiments résidentiels';
+  const feminin = g.classe === 'maison';
+  const situes = feminin ? 'situées' : 'situés';
+  const votre = feminin ? 'de la vôtre' : 'du vôtre';
+  const finesse = g.classe === 'maison' ? 'Même voisinage, maisons unifamiliales seulement, même taille'
+    : g.classe === 'condo' ? 'Même voisinage, condos seulement, même taille'
+    : g.classe === 'plex' ? 'Même voisinage, plex seulement, même taille, même nombre de logements à un près'
+    : 'Même voisinage, même taille, même nombre de logements à un près';
   return (
     <div>
       <h3 className="font-semibold">Vos bâtiments comparables</h3>
       {parDistance ? (
         <p className="mt-2 text-sm leading-relaxed">
-          Les <strong>{nombre(g.n)} bâtiments</strong> résidentiels situés à moins de <strong>{rayon}</strong> du vôtre,
-          {logMin != null && logMax != null && (
+          Les <strong>{nombre(g.n)} {quoi}</strong> {situes} à moins de <strong>{rayon}</strong> {votre},
+          {mentionLogements && logMin != null && logMax != null && (
             <> de <strong>{logMin === logMax ? `${logMin}` : `${logMin} à ${logMax}`} logement{(logMax ?? 0) > 1 ? 's' : ''}</strong>
               {g.logements != null && ` (le vôtre : ${g.logements})`},</>
           )}
           {g.aire_sujet_m2 != null && (
-            <> d’aire d’étages à <strong>±20 %</strong> de la vôtre ({nombre(g.aire_sujet_m2)} m²)</>
+            <> d’aire {g.classe === 'condo' ? 'de partie privative' : 'd’étages'} à <strong>±20 %</strong> de la vôtre ({nombre(g.aire_sujet_m2)} m²)</>
           )}
           {g.rues.length > 0 ? <>, autour de : {g.rues.join(', ')}</> : null}.
         </p>
@@ -97,7 +110,7 @@ function PanneauComparables({ g }: { g: GroupeSql }) {
         </p>
       )}
       <dl className="mt-3 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-sm">
-        {aire && <><dt className="text-gray-500">Aire d’étages</dt><dd>{aire}</dd></>}
+        {aire && <><dt className="text-gray-500">{g.classe === 'condo' ? 'Aire privative' : 'Aire d’étages'}</dt><dd>{aire}</dd></>}
         {etages && <><dt className="text-gray-500">Étages</dt><dd>{etages}</dd></>}
         {annees && <><dt className="text-gray-500">Construction</dt><dd>{annees}</dd></>}
       </dl>
@@ -105,7 +118,7 @@ function PanneauComparables({ g }: { g: GroupeSql }) {
         {parDistance
           ? (g.rayon_m != null && g.rayon_m > 500
               ? `Trop peu de bâtiments comparables à moins de 500 m : le rayon a été élargi à ${rayon}.`
-              : 'Même voisinage, même taille, même nombre de logements à un près : la comparaison la plus fine que permettent les données publiques.')
+              : `${finesse} : la comparaison la plus fine que permettent les données publiques.`)
           : (fin
               ? 'Même cellule, même nombre de logements : la comparaison la plus fine que permettent les données publiques.'
               : 'Trop peu d’immeubles de même taille dans la cellule : la comparaison porte sur toute la cellule.')}{' '}
