@@ -48,8 +48,8 @@ export default function Home() {
           <p className="mt-4 text-justify text-lg leading-relaxed text-ct-gris hyphens-auto" lang="fr">
             Entrez votre adresse. En une seconde, nous comparons la hausse imposée à votre
             immeuble à celle de ses bâtiments comparables — même voisinage, taille et nombre
-            de logements voisins — et nous vous disons honnêtement s’il vaut la peine
-            d’aller plus loin.
+            de logements voisins — et nous vous disons honnêtement si elle sort de
+            l’ordinaire.
           </p>
           <div className="mt-8">
             <PretriForm />
@@ -65,14 +65,14 @@ export default function Home() {
           logements à un près, aire d’étages à 20 % près.
         </Carte>
         <Carte titre="Ce qu’il ne voit pas" icone={Oeil}>
-          « Conforme » veut dire « rien d’anormal par rapport à vos voisins », pas « juste ».
-          Si tout un secteur est surévalué, seules les ventes réelles le montrent. Et une vente
-          récente de votre immeuble justifie souvent une forte hausse.
+          « Dans la norme » veut dire « rien d’inhabituel par rapport à vos voisins », pas
+          « juste ». Si tout un secteur est surévalué, seules les ventes réelles le montrent. Et
+          après une vente récente, la nouvelle valeur reflète souvent le prix payé.
         </Carte>
         <Carte titre="Et ensuite" icone={Fleche}>
-          Une demande de révision se gagne avec les prix de vente de propriétés comparables,
-          pas en comparant les valeurs au rôle des voisins. C’est l’analyse que fait le
-          rapport complet, à partir des ventes que la Ville vous affiche.
+          Une demande de révision s’appuie sur les prix de vente de propriétés comparables,
+          pas sur les valeurs au rôle des voisins : la Ville l’indique elle-même. C’est
+          l’analyse que fait le rapport complet, à partir des ventes qu’elle vous affiche.
         </Carte>
       </section>
 

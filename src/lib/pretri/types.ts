@@ -26,6 +26,20 @@ export interface PretriSql {
   n_comparables: number | null;
   comparaison: string | null;
   batiment_modifie: boolean;
+  /** Secteur uniforme : dispersion ramenée au plancher de 2 points, l'écart se lit en points de pourcentage. */
+  sigma_plancher?: boolean;
+  arrondissement?: string | null;
+  taux?: TauxSql | null;
+}
+
+export interface TauxSql {
+  annee: number;
+  /** En % de la valeur (= $ par 100 $ d'évaluation). */
+  taux_pct: number;
+  libelle: string;
+  niveau: 'arrondissement' | 'municipalite';
+  source_libelle: string;
+  source_url: string;
 }
 
 export interface GroupeSql {
@@ -94,4 +108,7 @@ export interface Verdict {
   groupe: GroupeSql | null;
   /** Transitions de rôle de l'immeuble, de la plus ancienne à la plus récente (courante comprise). */
   historique: TransitionSql[];
+  /** Ce qu'un point de hausse coûte en taxes, au taux de l'immeuble, avec sa source. */
+  enjeu: string;
+  taux: TauxSql | null;
 }

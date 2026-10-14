@@ -123,7 +123,7 @@ export default function CourbeSigma({ ecart, histo }: { ecart: number; histo?: H
 // (Les proportions réellement observées à Montréal sont plus fortes — voir
 // PLAN.md ; la case « distribution réelle » les montre pour le secteur.)
 export const LEGENDE_SIGMA: { bande: string; couleur: string; frequence: string; lecture: string; test: (e: number) => boolean; seuil: number | null }[] = [
-  { bande: 'moins de 1 σ', couleur: '#6da7ec', frequence: 'le cas courant — 2 évaluations sur 3', lecture: 'conforme à la moyenne', test: (e) => Math.abs(e) < 1, seuil: null },
+  { bande: 'moins de 1 σ', couleur: '#6da7ec', frequence: 'le cas courant — 2 évaluations sur 3', lecture: 'dans la norme', test: (e) => Math.abs(e) < 1, seuil: null },
   { bande: 'au-delà de +1 σ', couleur: '#9ec5f4', frequence: 'une évaluation sur 6 se situe aussi loin au-dessus de la médiane', lecture: 'significativement élevée', test: (e) => e >= 1 && e < 2, seuil: 1 },
   { bande: 'au-delà de +2 σ', couleur: '#cde2fb', frequence: 'une sur 44', lecture: 'très significativement élevée', test: (e) => e >= 2 && e < 3, seuil: 2 },
   { bande: 'au-delà de +3 σ', couleur: '#ffffff', frequence: 'une sur 740', lecture: 'hors de proportions', test: (e) => e >= 3, seuil: 3 },

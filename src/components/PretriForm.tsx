@@ -340,6 +340,30 @@ export default function PretriForm() {
               </dl>
             )}
 
+            {verdict.enjeu && verdict.taux && (
+              <div className="mt-5 border-t border-black/10 pt-4">
+                <p className="text-sm text-gray-800">
+                  {verdict.enjeu}
+                  <sup className="ml-px text-[0.7em] leading-none">
+                    <a href="#note-taux" className="text-ct-vert hover:underline" aria-label="Source du taux de taxation">1</a>
+                  </sup>
+                </p>
+                <p id="note-taux" className="mt-2 text-xs leading-relaxed text-gray-500">
+                  1. Source du taux :{' '}
+                  <a
+                    href={verdict.taux.source_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline decoration-ct-ligne underline-offset-2 hover:text-ct-encre"
+                  >
+                    {verdict.taux.source_libelle}
+                  </a>
+                  . Le taux de {verdict.taux.niveau === 'arrondissement' ? 'l’arrondissement' : 'la municipalité'} additionne
+                  les taxes calculées sur la valeur de l’immeuble ; il change chaque année.
+                </p>
+              </div>
+            )}
+
             {verdict.reserve && (
               <p className="mt-5 border-t border-black/10 pt-4 text-sm text-gray-700">{verdict.reserve}</p>
             )}

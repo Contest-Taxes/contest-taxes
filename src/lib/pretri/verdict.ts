@@ -1,4 +1,4 @@
-import type { Categorie, ResultatSql, Verdict } from './types';
+import type { Categorie, ResultatSql, TauxSql, Verdict } from './types';
 
 // Port de contestaxes.pretri.evaluer : mêmes catégories, mêmes phrases, mot
 // pour mot, pour que le site et le moteur disent la même chose. Les seuls
@@ -13,10 +13,47 @@ const dollars = (v: number) =>
 
 const sigma = (v: number) => Math.abs(v).toFixed(1).replace('.', ',');
 
+/** « 2,0 points de pourcentage » (singulier sous 2). */
+const points = (v: number) =>
+  `${Math.abs(v).toFixed(1).replace('.', ',')} point${Math.abs(v) >= 2 ? 's' : ''} de pourcentage`;
+
+const taux = (v: number) => v.toFixed(3).replace('.', ',') + ' %';
+
+const arrondir = (v: number) => Math.floor(v + 0.5);
+
+/** Secteur où la Ville a appliqué le même facteur à tous les comparables. */
+function phraseUniforme(ecartPoints: number): string {
+  const debut =
+    'Dans votre secteur, la Ville a appliqué à peu près la même hausse à tous ' +
+    'les bâtiments comparables : votre immeuble ';
+  if (Math.abs(ecartPoints) < 0.05) return debut + 'a reçu cette même hausse.';
+  const sens = ecartPoints > 0 ? 'au-dessus' : 'au-dessous';
+  return debut + `se situe à ${points(ecartPoints)} ${sens} de cette hausse.`;
+}
+
+/** Ce qu'un point de hausse coûte, et ce que l'écart coûte, au taux de l'immeuble. */
+function phraseEnjeu(valeurPrecedente: number, ecartPoints: number, tx: TauxSql): string {
+  const cout = arrondir(valeurPrecedente * 0.01 * tx.taux_pct / 100);
+  const ou =
+    tx.niveau === 'arrondissement'
+      ? `Au taux de taxation résidentiel de ${taux(tx.taux_pct)} en vigueur en ${tx.annee} dans ${tx.libelle}`
+      : `Au taux global de taxation de ${taux(tx.taux_pct)} de ${tx.libelle} ` +
+        `(données ${tx.annee} du ministère des Affaires municipales et de l'Habitation)`;
+  let s = `${ou}, chaque point de pourcentage de hausse représente environ ${dollars(cout)} de taxes par année.`;
+  if (ecartPoints >= 0.05) {
+    const parAn = arrondir(ecartPoints * cout);
+    s +=
+      ` Vos ${points(ecartPoints)} de plus que vos comparables vous coûteraient donc ` +
+      `près de ${dollars(parAn)} par année, soit environ ${dollars(3 * parAn)} sur les ` +
+      `trois ans du rôle, si les taux restaient les mêmes.`;
+  }
+  return s;
+}
+
 const RESERVE_VENTE =
   "Un point que ce tri ne peut pas vérifier : si votre immeuble a été vendu " +
-  "vers 2024, la hausse ne fait sans doute que rattraper le prix payé, et elle " +
-  "est alors pleinement justifiée.";
+  "vers 2024, la nouvelle valeur reflète sans doute le prix payé, et l'écart " +
+  "s'explique alors de lui-même.";
 
 const FORCE: Record<'defendable' | 'solide' | 'hors_proportions', string> = {
   defendable: 'se distingue de celle de vos semblables',
@@ -37,6 +74,8 @@ function base(r: ResultatSql, categorie: Categorie): Verdict {
     chiffres: r.pretri ?? null,
     groupe: r.groupe ?? null,
     historique: [],
+    enjeu: '',
+    taux: r.pretri?.taux ?? null,
   };
 }
 
@@ -134,29 +173,36 @@ function calculer(r: ResultatSql, adresseSaisie: string): Verdict {
 
   const e = p.ecart_sigma;
   const med = p.secteur_mediane_pct ?? 0;
-  const commun =
+  let commun =
     `Au rôle ${p.role_libelle}, votre immeuble passe de ${dollars(p.valeur_precedente)} ` +
     `à ${dollars(p.valeur_proposee)}, soit ${pct(p.hausse_pct)}. Les ${p.n_comparables} ` +
     `bâtiments comparables de votre secteur ont connu ${pct(med)} en médiane.`;
+  const ecartPoints = p.hausse_pct - med;
+  const uniforme = Boolean(p.sigma_plancher);
+  if (uniforme) commun += ' ' + phraseUniforme(ecartPoints);
+  if (p.taux) v.enjeu = phraseEnjeu(p.valeur_precedente, ecartPoints, p.taux);
 
   if (r.categorie === 'avantageux') {
     v.titre = 'Votre évaluation est plus basse que celle de vos semblables';
     v.message =
-      `${commun} Vous êtes nettement en dessous. Contester exposerait au risque d'une ` +
-      `révision à la hausse — nous vous le déconseillons.`;
+      `${commun} Vous êtes nettement en dessous. À savoir : une demande de ` +
+      `révision rouvre l'évaluation dans les deux sens, et l'évaluateur peut ` +
+      `aussi la revoir à la hausse.`;
     return v;
   }
 
   if (r.categorie === 'conforme') {
-    v.titre = 'Votre évaluation paraît conforme';
+    v.titre = 'Votre évaluation paraît dans la norme';
+    const marge = uniforme
+      ? "Un écart de moins de 2 points de pourcentage reste dans la marge d'arrondi de la méthode."
+      : "L'écart reste dans la variation ordinaire entre immeubles semblables.";
     v.message =
-      `${commun} L'écart reste dans la variation ordinaire entre immeubles semblables. ` +
-      `Une contestation fondée sur la valeur aurait peu de chances d'aboutir, et les ` +
-      `frais d'ouverture seraient perdus.`;
+      `${commun} ${marge} Sur le seul critère de la valeur, rien ne distingue ` +
+      `votre évaluation de celles de vos comparables.`;
     v.reserve =
       "Restent d'autres motifs, indépendants de la valeur : une erreur de superficie, " +
-      "de nombre de logements ou d'usage inscrit au rôle se conteste aussi, et se " +
-      "vérifie sur votre avis d'évaluation.";
+      "de nombre de logements ou d'usage inscrit au rôle peut aussi faire l'objet " +
+      "d'une demande de révision, et se vérifie sur votre avis d'évaluation.";
     return v;
   }
 
@@ -164,13 +210,17 @@ function calculer(r: ResultatSql, adresseSaisie: string): Verdict {
   const cat = r.categorie as keyof typeof FORCE;
   v.rapport_recommande = true;
   v.titre = `Votre hausse ${FORCE[cat]}`;
-  const rang =
-    p.centile != null
-      ? `Vous vous situez au ${p.centile.toFixed(0)}ᵉ centile de votre secteur, à`
-      : 'Vous vous situez à';
-  v.message =
-    `${commun} ${rang} ${sigma(e)} écarts-types de la médiane. Un écart de cette ` +
-    `ampleur mérite d'être examiné en détail.`;
+  if (uniforme) {
+    v.message = `${commun} Un écart de cette ampleur est inhabituel entre bâtiments comparables.`;
+  } else {
+    const rang =
+      p.centile != null
+        ? `Vous vous situez au ${p.centile.toFixed(0)}ᵉ centile de votre secteur, à`
+        : 'Vous vous situez à';
+    v.message =
+      `${commun} ${rang} ${sigma(e)} écarts-types de la médiane. Un écart de cette ` +
+      `ampleur est inhabituel entre bâtiments comparables.`;
+  }
   v.reserve = RESERVE_VENTE;
   return v;
 }
