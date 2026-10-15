@@ -353,6 +353,14 @@ export default function PretriForm() {
                     <a href="#note-taux" className="text-ct-vert hover:underline" aria-label="Source du taux de taxation">1</a>
                   </sup>
                 </p>
+                {verdict.frais_texte && verdict.frais && (
+                  <p className="mt-2 text-sm text-gray-800">
+                    {verdict.frais_texte}
+                    <sup className="ml-px text-[0.7em] leading-none">
+                      <a href="#note-frais" className="text-ct-vert hover:underline" aria-label="Source des frais de révision">2</a>
+                    </sup>
+                  </p>
+                )}
                 <p id="note-taux" className="mt-2 text-xs leading-relaxed text-gray-500">
                   1. Source du taux :{' '}
                   <a
@@ -366,6 +374,20 @@ export default function PretriForm() {
                   . Le taux de {verdict.taux.niveau === 'arrondissement' ? 'l’arrondissement' : 'la municipalité'} additionne
                   les taxes calculées sur la valeur de l’immeuble ; il change chaque année.
                 </p>
+                {verdict.frais_texte && verdict.frais && (
+                  <p id="note-frais" className="mt-1 text-xs leading-relaxed text-gray-500">
+                    2. Source des frais :{' '}
+                    <a
+                      href={verdict.frais.source_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="underline decoration-ct-ligne underline-offset-2 hover:text-ct-encre"
+                    >
+                      {verdict.frais.source_libelle}
+                    </a>
+                    . Le barème dépend de la valeur inscrite au rôle au moment de la demande.
+                  </p>
+                )}
               </div>
             )}
 

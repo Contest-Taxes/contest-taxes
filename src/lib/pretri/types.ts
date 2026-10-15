@@ -33,6 +33,17 @@ export interface PretriSql {
   sigma_plancher?: boolean;
   arrondissement?: string | null;
   taux?: TauxSql | null;
+  frais?: FraisSql | null;
+}
+
+export interface FraisSql {
+  /** Somme exigée au dépôt d'une demande de révision pour un immeuble de cette valeur. */
+  frais: number;
+  annee: number;
+  nom: string;
+  remboursement?: string | null;
+  source_libelle: string;
+  source_url: string;
 }
 
 export interface CouvertureSql {
@@ -132,4 +143,7 @@ export interface Verdict {
   enjeu: string;
   taux: TauxSql | null;
   couverture: CouvertureSql | null;
+  /** Frais de dépôt d'une demande de révision, rapportés au coût d'un point. */
+  frais_texte: string;
+  frais: FraisSql | null;
 }

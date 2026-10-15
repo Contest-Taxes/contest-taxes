@@ -1,4 +1,4 @@
-import type { Categorie, ResultatSql, TauxSql, Verdict } from './types';
+import type { Categorie, FraisSql, ResultatSql, TauxSql, Verdict } from './types';
 
 // Port de contestaxes.pretri.evaluer : mêmes catégories, mêmes phrases, mot
 // pour mot, pour que le site et le moteur disent la même chose. Les seuls
@@ -29,6 +29,21 @@ function phraseUniforme(ecartPoints: number): string {
   if (Math.abs(ecartPoints) < 0.05) return debut + 'a reçu cette même hausse.';
   const sens = ecartPoints > 0 ? 'au-dessus' : 'au-dessous';
   return debut + `se situe à ${points(ecartPoints)} ${sens} de cette hausse.`;
+}
+
+/** 90 $, 574,50 $ : les cents seulement s'il y en a. */
+const montant = (v: number) =>
+  (Math.abs(v - Math.round(v)) >= 0.005
+    ? v.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
+    : String(Math.round(v)).replace(/\B(?=(\d{3})+(?!\d))/g, ' ')) + ' $';
+
+/** Les frais de dépôt d'une demande de révision et leur remboursement (ou non). */
+function phraseFrais(fr: FraisSql): string {
+  let s =
+    `Déposer une demande de révision à ${fr.nom} coûte ${montant(fr.frais)} pour un immeuble ` +
+    `de cette valeur, selon le barème de ${fr.annee}.`;
+  if (fr.remboursement) s += ' ' + fr.remboursement;
+  return s;
 }
 
 /** Ce qu'un point de hausse coûte, et ce que l'écart coûte, au taux de l'immeuble. */
@@ -76,6 +91,8 @@ function base(r: ResultatSql, categorie: Categorie): Verdict {
     historique: [],
     enjeu: '',
     taux: r.pretri?.taux ?? null,
+    frais_texte: '',
+    frais: r.pretri?.frais ?? null,
     couverture: r.couverture ?? null,
   };
 }
@@ -206,6 +223,7 @@ function calculer(r: ResultatSql, adresseSaisie: string): Verdict {
   const uniforme = Boolean(p.sigma_plancher);
   if (uniforme) commun += ' ' + phraseUniforme(ecartPoints);
   if (p.taux) v.enjeu = phraseEnjeu(p.valeur_precedente, ecartPoints, p.taux);
+  if (p.frais) v.frais_texte = phraseFrais(p.frais);
 
   if (r.categorie === 'avantageux') {
     v.titre = 'Votre évaluation est plus basse que celle de vos semblables';
