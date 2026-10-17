@@ -4,12 +4,15 @@
 export type Categorie =
   | 'avantageux' | 'conforme' | 'defendable' | 'solide' | 'hors_proportions'
   | 'batiment_modifie' | 'indeterminable' | 'hors_champ' | 'adresse_partagee' | 'introuvable'
-  | 'ville_inconnue' | 'ville_non_couverte' | 'adresse_ambigue';
+  | 'ville_inconnue' | 'ville_non_couverte' | 'adresse_ambigue' | 'appartement_inconnu';
 
 export interface UniteSql {
   /** Code géographique MAMH de la ville (66023 = Montréal). */
   ville?: string | null;
   adresse: string;
+  /** Adresse de l'immeuble sans appartement, et l'appartement quand il désigne l'unité (copropriété). */
+  adresse_base?: string;
+  appartement?: string | null;
   logements: number | null;
   categorie: string | null;
   utilisation: string | null;
@@ -102,6 +105,12 @@ export interface ResultatSql {
   rapport_recommande?: boolean;
   groupe?: GroupeSql | null;
   n_unites?: number;
+  /** Copropriété : unités de l'adresse qui portent un numéro d'appartement, le plus petit en exemple. */
+  avec_appartements?: number;
+  appartement_exemple?: string | null;
+  /** Numéro demandé mais absent de l'adresse, et les numéros présents les plus proches. */
+  appartement?: string;
+  appartements_proches?: string[];
   /** Ville nommée après la virgule, quand elle est inconnue ou pas encore couverte. */
   ville?: string;
   ville_code?: string;
@@ -134,6 +143,8 @@ export interface Verdict {
   reserve: string;
   /** Lignes supplémentaires (voies approchantes, numéros voisins), à afficher en liste. */
   pistes: string[];
+  /** Adresse partagée dont les unités portent des numéros d'appartement : le formulaire demande le numéro. */
+  appartement_requis: boolean;
   unite: UniteSql | null;
   chiffres: PretriSql | null;
   groupe: GroupeSql | null;

@@ -196,6 +196,7 @@ function PanneauSigma({ ecart, histo, superposer, setSuperposer }: {
 
 export default function PretriForm() {
   const [adresse, setAdresse] = useState('');
+  const [appartement, setAppartement] = useState('');
   const [chargement, setChargement] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
   const [verdict, setVerdict] = useState<Verdict | null>(null);
@@ -248,6 +249,13 @@ export default function PretriForm() {
     chercher(nouvelle);
   }
 
+  // Copropriété : le numéro d'appartement saisi s'ajoute à l'adresse, après une virgule.
+  function chercherUnite(num: string) {
+    const nouvelle = `${adresse.trim().replace(/[\s,]+$/, '')}, app. ${num.trim()}`;
+    setAdresse(nouvelle);
+    chercher(nouvelle);
+  }
+
   const c = verdict?.chiffres ?? null;
   const u = verdict?.unite ?? null;
   const g = verdict?.groupe ?? null;
@@ -276,7 +284,7 @@ export default function PretriForm() {
           {chargement ? 'Recherche…' : 'Vérifier'}
         </button>
       </form>
-      <p className="mt-3 text-sm text-ct-gris">Gratuit, sans compte. Aucune adresse n’est conservée.</p>
+      <p className="mt-3 text-sm text-ct-gris">Gratuit, sans compte. Aucune adresse n’est conservée. En copropriété, ajoutez votre numéro d’appartement, par exemple « 1155 rue de la Montagne, app. 316 ».</p>
 
       {erreur && (
         <div role="alert" className="mt-6 max-w-2xl rounded-xl border border-red-200 bg-ct-rouge-pale p-4 text-ct-rouge">
@@ -322,6 +330,33 @@ export default function PretriForm() {
                   </li>
                 ))}
               </ul>
+            )}
+
+            {verdict.appartement_requis && (
+              <form
+                onSubmit={(e) => { e.preventDefault(); if (appartement.trim()) chercherUnite(appartement); }}
+                className="mt-4 flex flex-wrap items-end gap-3"
+              >
+                <label className="text-sm text-gray-700">
+                  Numéro d’appartement
+                  <input
+                    name="appartement"
+                    value={appartement}
+                    onChange={(e) => setAppartement(e.target.value)}
+                    placeholder="316"
+                    maxLength={8}
+                    required
+                    className="mt-1 block w-32 rounded-lg border border-ct-ligne px-3 py-2 text-base outline-none transition focus:border-ct-vert focus:ring-2 focus:ring-ct-vert/20"
+                  />
+                </label>
+                <button
+                  type="submit"
+                  disabled={chargement}
+                  className="rounded-lg bg-ct-vert px-4 py-2 font-semibold text-white transition hover:bg-ct-vert-fonce disabled:opacity-50"
+                >
+                  Vérifier cette unité
+                </button>
+              </form>
             )}
 
             {c && c.ecart_sigma != null && (
@@ -420,7 +455,9 @@ export default function PretriForm() {
               </div>
             )}
 
-            {(verdict.categorie === 'hors_champ' || verdict.categorie === 'adresse_partagee' ||
+            {(verdict.categorie === 'hors_champ' ||
+              (verdict.categorie === 'adresse_partagee' && !verdict.appartement_requis) ||
+              (verdict.categorie === 'appartement_inconnu' && verdict.pistes.length === 0) ||
               verdict.categorie === 'batiment_modifie' || verdict.categorie === 'indeterminable' ||
               verdict.categorie === 'ville_non_couverte') && (
               <p className="mt-5"><a href="/contact" className="underline">Nous joindre →</a></p>

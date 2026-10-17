@@ -85,6 +85,7 @@ function base(r: ResultatSql, categorie: Categorie): Verdict {
     message: '',
     reserve: '',
     pistes: [],
+    appartement_requis: false,
     unite: r.unite ?? null,
     chiffres: r.pretri ?? null,
     groupe: r.groupe ?? null,
@@ -168,14 +169,45 @@ function calculer(r: ResultatSql, adresseSaisie: string): Verdict {
   }
   if (!r || r.categorie === 'introuvable') return introuvable(r, adresseSaisie);
 
+  // Copropriété : plusieurs unités à l'adresse. Textes identiques à ceux du
+  // moteur (pretri.phrase_partagee, phrase_appartement_inconnu).
   if (r.categorie === 'adresse_partagee') {
     const v = base(r, 'adresse_partagee');
     v.titre = 'Plusieurs unités partagent cette adresse';
-    v.message =
-      `${r.n_unites} unités d'évaluation sont inscrites à cette adresse — il s'agit ` +
-      `sans doute d'une copropriété. Ce tri ne peut pas encore distinguer les unités ` +
-      `d'un même immeuble ; le numéro d'appartement sera demandé dans une prochaine ` +
-      `version. Écrivez-nous si vous souhaitez une analyse dès maintenant.`;
+    const n = r.n_unites ?? 0;
+    const ville = r.couverture?.nom ? `, ${r.couverture.nom}` : '';
+    const immeuble = r.unite?.adresse_base ?? r.unite?.adresse ?? adresseSaisie;
+    if ((r.avec_appartements ?? 0) > 0 && r.appartement_exemple) {
+      v.appartement_requis = true;
+      v.message =
+        `${n} unités d'évaluation sont inscrites à cette adresse : il s'agit sans doute ` +
+        `d'une copropriété. Ajoutez votre numéro d'appartement pour que le tri retrouve ` +
+        `votre unité, par exemple « ${immeuble}, app. ${r.appartement_exemple}${ville} ».`;
+    } else {
+      v.message =
+        `${n} unités d'évaluation sont inscrites à cette adresse, et le rôle ne leur attribue ` +
+        `pas de numéro d'appartement. Nous ne pouvons pas distinguer la vôtre automatiquement : ` +
+        `écrivez-nous en indiquant le numéro de matricule inscrit sur votre compte de taxes.`;
+    }
+    return v;
+  }
+  if (r.categorie === 'appartement_inconnu') {
+    const v = base(r, 'appartement_inconnu');
+    v.titre = "Aucune unité ne porte ce numéro d'appartement";
+    const n = r.n_unites ?? 0;
+    const ville = r.couverture?.nom ? `, ${r.couverture.nom}` : '';
+    const immeuble = r.unite?.adresse_base ?? r.unite?.adresse ?? adresseSaisie;
+    if ((r.avec_appartements ?? 0) > 0) {
+      v.message =
+        `${n} unités d'évaluation sont inscrites à cette adresse, mais aucune ne porte le ` +
+        `numéro d'appartement « ${r.appartement ?? ''} ». Numéros présents :`;
+      v.pistes = (r.appartements_proches ?? []).map((a) => `${immeuble}, app. ${a}${ville}`);
+    } else {
+      v.message =
+        `${n} unités d'évaluation sont inscrites à cette adresse, mais le rôle ne leur attribue ` +
+        `pas de numéro d'appartement. Écrivez-nous en indiquant le numéro de matricule inscrit ` +
+        `sur votre compte de taxes.`;
+    }
     return v;
   }
 
