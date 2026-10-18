@@ -72,7 +72,8 @@ export default async function Home() {
             ))}
           </div>
           <h1 className="mt-4 text-3xl font-bold leading-tight tracking-tight sm:text-4xl">{T.titre}</h1>
-          <p className="mt-4 text-justify text-lg leading-relaxed text-ct-gris hyphens-auto" lang={langue}>{T.intro}</p>
+          <p className="mt-4 text-justify text-lg leading-relaxed text-ct-gris hyphens-auto" lang={langue}>{T.intro1}</p>
+          <p className="mt-3 text-justify leading-relaxed text-ct-gris hyphens-auto" lang={langue}>{T.intro2}</p>
           <p className="mt-3 text-sm text-ct-gris">
             {T.couvre}{' '}
             {pleines.length

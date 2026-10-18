@@ -8,6 +8,7 @@ import { fmtNombre, t } from '@/lib/i18n/textes';
 import type { Langue } from '@/lib/i18n/langue';
 import { motsClesVerdict } from '@/lib/pretri/verdict';
 import { decrireComparables } from '@/lib/pretri/comparables';
+import { telechargerAnalysePdf } from '@/lib/pretri/pdfClient';
 
 const TEINTE: Record<string, string> = {
   avantageux: 'border-emerald-200 bg-emerald-50',
@@ -201,20 +202,8 @@ export default function PretriForm() {
     setPdfEnCours(true);
     setErreur(null);
     try {
-      const rep = await fetch('/api/analyse-preliminaire', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ adresse: adresseVerdict, langue }),
-      });
-      if (!rep.ok) {
-        const corps = await rep.json().catch(() => ({}));
-        setErreur(corps.erreur ?? T.erreur);
-        return;
-      }
-      const blob = await rep.blob();
-      const nom = decodeURIComponent(rep.headers.get('X-Nom-Fichier') ?? 'analyse-preliminaire.pdf');
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url; a.download = nom; a.click();
-      URL.revokeObjectURL(url);
+      const erreurPdf = await telechargerAnalysePdf(adresseVerdict, langue);
+      if (erreurPdf) setErreur(erreurPdf);
     } catch {
       setErreur(T.erreurReseau);
     } finally {
@@ -369,12 +358,12 @@ export default function PretriForm() {
               </div>
             )}
 
-            {verdict.rapport_recommande && (
+            {(verdict.rapport_recommande || verdict.categorie === 'conforme') && (
               <div className="mt-6">
                 <a href={`/dashboard?adresse=${encodeURIComponent(adresseVerdict)}`} className="inline-block rounded-xl bg-ct-vert px-5 py-3 font-semibold text-white transition hover:bg-ct-vert-fonce">
-                  {T.poursuivre}
+                  {verdict.rapport_recommande ? T.poursuivre : T.poursuivreNorme}
                 </a>
-                <p className="mt-2 text-sm text-gray-600">{T.poursuivreNote}</p>
+                <p className="mt-2 text-sm text-gray-600">{verdict.rapport_recommande ? T.poursuivreNote : T.poursuivreNormeNote}</p>
               </div>
             )}
 

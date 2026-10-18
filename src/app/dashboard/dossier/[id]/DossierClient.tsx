@@ -7,6 +7,7 @@ import type { Dossier, Rapport, Vente } from '@/lib/espace/types';
 import { analyserVentes, type VenteSaisie } from '@/lib/espace/ventes';
 import { useLangue } from '@/lib/i18n/LangueProvider';
 import { fmtDate, fmtDollars, fmtPct, t } from '@/lib/i18n/textes';
+import { telechargerAnalysePdf } from '@/lib/pretri/pdfClient';
 
 // Un dossier : l'immeuble, où en est l'analyse, les rapports déposés (une
 // langue par fichier), les ventes fournies, les notes du client.
@@ -25,6 +26,7 @@ export default function DossierClient({ id }: { id: string }) {
   const [ajout, setAjout] = useState(false);
   const [notes, setNotes] = useState('');
   const [notesEnregistrees, setNotesEnregistrees] = useState(false);
+  const [pdfEnCours, setPdfEnCours] = useState(false);
 
   const charger = useCallback(async () => {
     const { data: s } = await supabase.auth.getSession();
@@ -62,6 +64,18 @@ export default function DossierClient({ id }: { id: string }) {
     const { error } = await supabase.from('dossiers').update({ notes_client: notes }).eq('id', id);
     if (error) setErreur(error.message);
     else { setNotesEnregistrees(true); setTimeout(() => setNotesEnregistrees(false), 2500); }
+  }
+
+  async function analysePdf() {
+    if (!dossier) return;
+    setPdfEnCours(true);
+    setErreur(null);
+    try {
+      const e = await telechargerAnalysePdf(dossier.adresse, langue);
+      if (e) setErreur(e);
+    } finally {
+      setPdfEnCours(false);
+    }
   }
 
   async function telecharger(chemin: string, nomFichier: string) {
@@ -111,6 +125,12 @@ export default function DossierClient({ id }: { id: string }) {
         {rapports.length === 0 && dossier.statut === 'rapport_disponible' && dossier.rapport_chemin && (
           <button type="button" onClick={() => telecharger(dossier.rapport_chemin!, 'rapport.pdf')} className="mt-4 rounded-xl bg-ct-vert px-5 py-3 font-semibold text-white transition hover:bg-ct-vert-fonce">{T.telechargerPdf}</button>
         )}
+        <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-ct-ligne pt-4">
+          <button type="button" onClick={analysePdf} disabled={pdfEnCours} className="rounded-xl border border-ct-vert px-4 py-2 font-semibold text-ct-vert transition hover:bg-ct-vert-pale disabled:opacity-50">
+            {pdfEnCours ? T.analysePdfEnCours : T.analysePdf}
+          </button>
+          <span className="text-xs text-ct-gris">{T.analysePdfNote}</span>
+        </div>
       </section>
 
       {c && (
