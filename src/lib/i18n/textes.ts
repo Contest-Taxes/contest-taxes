@@ -9,7 +9,7 @@ const fr = {
   accueil: {
     titre: 'Votre nouvelle évaluation foncière semble-t-elle hors norme?',
     intro1: 'Tous les trois ans, votre municipalité dépose un nouveau rôle d’évaluation, et vous recevez votre nouvelle valeur sans savoir comment elle se compare à celle de vos voisins. L’analyse préliminaire répond à cette première question. Entrez votre adresse : en une seconde, nous situons la hausse de votre immeuble parmi celles des bâtiments comparables de votre secteur, même type, maison, condo ou plex, même taille à 20 % près, à moins de 500 m.',
-    intro2: 'Le résultat vous dit honnêtement si votre hausse est dans la norme de votre secteur ou si elle s’en écarte, de combien de points de pourcentage, et ce que chaque point représente en taxes au taux de votre municipalité. C’est un premier coup d’œil, rien de plus : il compare des valeurs inscrites au rôle, pas des prix de vente, et une demande de révision ne peut pas s’appuyer sur lui. Une hausse « dans la norme » veut dire que vous avez été traité comme vos voisins, pas que votre nouvelle valeur est juste. Seule l’analyse complète, fondée sur les ventes d’immeubles semblables, le dit.',
+    intro2: 'Le résultat vous dit si votre hausse est dans la norme de votre secteur ou si elle s’en écarte. L’analyse préliminaire n’est toutefois qu’un indicateur : elle compare des valeurs inscrites au rôle, pas des prix de vente, et une demande de révision en bonne et due forme ne peut pas s’y appuyer. Seule l’analyse complète, fondée sur les ventes d’immeubles semblables, peut servir à cette fin.',
     couvre: 'Couvre',
     role: 'rôle',
     millesime: 'millésime',
@@ -113,7 +113,7 @@ const en: typeof fr = {
   accueil: {
     titre: 'Does your new property assessment look out of line?',
     intro1: 'Every three years, your municipality files a new assessment roll, and you receive your new value without knowing how it compares with your neighbours’. The preliminary analysis answers that first question. Enter your address: in a second, we place your building’s increase among those of the comparable buildings in your sector, same type, house, condo or plex, similar size within 20%, within 500 m.',
-    intro2: 'The result tells you honestly whether your increase is within the norm of your sector or departs from it, by how many percentage points, and what each point represents in taxes at your municipality’s rate. It is a first look, nothing more: it compares values entered on the roll, not sale prices, and a request for review cannot rest on it. An increase “within the norm” means you were treated like your neighbours, not that your new value is fair. Only the full analysis, based on sales of similar buildings, can tell.',
+    intro2: 'The result tells you whether your increase is within the norm of your sector or departs from it. The preliminary analysis is only an indicator, however: it compares values entered on the roll, not sale prices, and a formal request for review cannot rest on it. Only the full analysis, based on sales of similar buildings, can serve that purpose.',
     couvre: 'Covers',
     role: 'roll',
     millesime: 'year',
