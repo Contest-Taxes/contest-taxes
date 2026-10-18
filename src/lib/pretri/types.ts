@@ -145,6 +145,8 @@ export interface Verdict {
   pistes: string[];
   /** Adresse partagée dont les unités portent des numéros d'appartement : le formulaire demande le numéro. */
   appartement_requis: boolean;
+  /** Matricule de l'unité trouvée, pour ouvrir un dossier. */
+  matricule: string | null;
   unite: UniteSql | null;
   chiffres: PretriSql | null;
   groupe: GroupeSql | null;

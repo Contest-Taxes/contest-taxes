@@ -4,6 +4,7 @@
 // en orange. En option, la distribution réelle des comparables se superpose à
 // la courbe, en orange translucide.
 import type { GroupeSql } from '@/lib/pretri/types';
+import type { Langue } from '@/lib/i18n/langue';
 
 const BANDES = [
   { de: 0, a: 1, couleur: '#6da7ec' },
@@ -33,7 +34,7 @@ function courbe(): string {
   return `M${pts.join(' L')}`;
 }
 
-const fmt = (v: number) => (v >= 0 ? '+' : '−') + Math.abs(v).toFixed(1).replace('.', ',');
+const fmt = (v: number, langue: Langue) => (v >= 0 ? '+' : '−') + (langue === 'fr' ? Math.abs(v).toFixed(1).replace('.', ',') : Math.abs(v).toFixed(1));
 
 /** Fonction de répartition de la loi normale centrée réduite (Abramowitz-Stegun 26.2.17, erreur < 1e-7). */
 export function phi(z: number): number {
@@ -49,22 +50,23 @@ export function uneSur(e: number): number {
 }
 
 /** « environ une évaluation sur 44 », avec un arrondi qui suit l'ordre de grandeur. */
-export function formaterUneSur(n: number): string {
-  if (!Number.isFinite(n) || n >= 1e6) return 'moins d’une évaluation sur un million';
+export function formaterUneSur(n: number, langue: Langue = 'fr'): string {
+  if (!Number.isFinite(n) || n >= 1e6) return langue === 'fr' ? 'moins d’une évaluation sur un million' : 'fewer than one assessment in a million';
   const arrondi = n >= 1000 ? Math.round(n / 100) * 100 : n >= 100 ? Math.round(n / 10) * 10 : Math.round(n);
-  return `environ une évaluation sur ${String(arrondi).replace(/\B(?=(\d{3})+(?!\d))/g, ' ')}`;
+  const s = String(arrondi).replace(/\B(?=(\d{3})+(?!\d))/g, langue === 'fr' ? ' ' : ',');
+  return langue === 'fr' ? `environ une évaluation sur ${s}` : `about one assessment in ${s}`;
 }
 
 type Histo = NonNullable<GroupeSql['histogramme']>;
 
-export default function CourbeSigma({ ecart, histo }: { ecart: number; histo?: Histo | null }) {
+export default function CourbeSigma({ ecart, histo, langue = 'fr' }: { ecart: number; histo?: Histo | null; langue?: Langue }) {
+  const fr = langue === 'fr';
   const horsCadre = Math.abs(ecart) > 3.7;
   const xs = Math.max(-3.7, Math.min(3.7, ecart));
-  const etiquette = horsCadre ? `vous : ${ecart > 0 ? '> +3' : '< −3'} σ (${fmt(ecart)})` : `vous : ${fmt(ecart)} σ`;
+  const vous = fr ? 'vous' : 'you';
+  const etiquette = horsCadre ? `${vous} : ${ecart > 0 ? '> +3' : '< −3'} σ (${fmt(ecart, langue)})` : `${vous} : ${fmt(ecart, langue)} σ`;
   const ancreTexte = xs > 2 ? 'end' : xs < -2 ? 'start' : 'middle';
 
-  // Barres de la distribution réelle, à l'échelle de la courbe : densité
-  // (part du groupe par unité de σ) rapportée à la densité du sommet normal.
   let barres: { x0: number; x1: number; h: number }[] = [];
   let nHisto = 0;
   if (histo && histo.comptes.length > 0) {
@@ -77,7 +79,7 @@ export default function CourbeSigma({ ecart, histo }: { ecart: number; histo?: H
   }
 
   return (
-    <svg viewBox={`0 0 ${L} ${H}`} role="img" aria-label={`Position de votre immeuble : ${fmt(ecart)} écarts-types de la médiane`} className="w-full">
+    <svg viewBox={`0 0 ${L} ${H}`} role="img" aria-label={fr ? `Position de votre immeuble : ${fmt(ecart, langue)} écarts-types de la médiane` : `Position of your building: ${fmt(ecart, langue)} standard deviations from the median`} className="w-full">
       {BANDES.map((b) => (
         <g key={b.de}>
           <path d={aire(b.de, b.a)} fill={b.couleur} />
@@ -89,10 +91,10 @@ export default function CourbeSigma({ ecart, histo }: { ecart: number; histo?: H
               fill={COMPS} fillOpacity={0.55} stroke={COMPS} strokeOpacity={0.8} strokeWidth={0.5} />
       ))}
       {histo && histo.sous > 0 && (
-        <text x={G + 2} y={py(0) - 4} fontSize={9} fill={COMPS}>◂ {histo.sous} sous −4 σ</text>
+        <text x={G + 2} y={py(0) - 4} fontSize={9} fill={COMPS}>◂ {histo.sous} {fr ? 'sous −4 σ' : 'below −4 σ'}</text>
       )}
       {histo && histo.sur > 0 && (
-        <text x={L - D - 2} y={py(0) - 4} fontSize={9} fill={COMPS} textAnchor="end">{histo.sur} au-delà de +4 σ ▸</text>
+        <text x={L - D - 2} y={py(0) - 4} fontSize={9} fill={COMPS} textAnchor="end">{histo.sur} {fr ? 'au-delà de +4 σ' : 'beyond +4 σ'} ▸</text>
       )}
       <path d={courbe()} fill="none" stroke={LIGNE} strokeWidth={1.5} />
       <line x1={G} y1={py(0)} x2={L - D} y2={py(0)} stroke="#c3c2b7" strokeWidth={1} />
@@ -100,12 +102,12 @@ export default function CourbeSigma({ ecart, histo }: { ecart: number; histo?: H
         <g key={k}>
           <line x1={px(k)} y1={py(0)} x2={px(k)} y2={py(0) + 4} stroke="#898781" />
           <text x={px(k)} y={py(0) + 16} textAnchor="middle" fontSize={11} fill="#52514e">
-            {k === 0 ? 'médiane' : `${k > 0 ? '+' : '−'}${Math.abs(k)} σ`}
+            {k === 0 ? (fr ? 'médiane' : 'median') : `${k > 0 ? '+' : '−'}${Math.abs(k)} σ`}
           </text>
         </g>
       ))}
       <text x={px(0)} y={H - 6} textAnchor="middle" fontSize={10} fill="#898781">
-        hausse de vos comparables, en écarts-types autour de la médiane
+        {fr ? 'hausse de vos comparables, en écarts-types autour de la médiane' : 'increase of your comparables, in standard deviations around the median'}
       </text>
       <line x1={px(xs)} y1={HAUT - 6} x2={px(xs)} y2={py(0)} stroke={SUJET} strokeWidth={1.5} strokeDasharray={horsCadre ? '4 3' : undefined} />
       <polygon points={`${px(xs)},${HAUT - 14} ${px(xs) - 5},${HAUT - 4} ${px(xs) + 5},${HAUT - 4}`} fill={SUJET} />
@@ -120,14 +122,17 @@ export default function CourbeSigma({ ecart, histo }: { ecart: number; histo?: H
 // qui se pose à quelqu'un dont la hausse est élevée est « combien d'évaluations
 // se situent au moins aussi loin au-dessus de la médiane ». Au-delà de +1 σ :
 // 15,9 % (une sur 6) ; +2 σ : 2,3 % (une sur 44) ; +3 σ : 0,13 % (une sur 740).
-// (Les proportions réellement observées à Montréal sont plus fortes — voir
-// PLAN.md ; la case « distribution réelle » les montre pour le secteur.)
-export const LEGENDE_SIGMA: { bande: string; couleur: string; frequence: string; lecture: string; test: (e: number) => boolean; seuil: number | null }[] = [
-  { bande: 'moins de 1 σ', couleur: '#6da7ec', frequence: 'le cas courant — 2 évaluations sur 3', lecture: 'dans la norme', test: (e) => Math.abs(e) < 1, seuil: null },
-  { bande: 'au-delà de +1 σ', couleur: '#9ec5f4', frequence: 'une évaluation sur 6 se situe aussi loin au-dessus de la médiane', lecture: 'significativement élevée', test: (e) => e >= 1 && e < 2, seuil: 1 },
-  { bande: 'au-delà de +2 σ', couleur: '#cde2fb', frequence: 'une sur 44', lecture: 'très significativement élevée', test: (e) => e >= 2 && e < 3, seuil: 2 },
-  { bande: 'au-delà de +3 σ', couleur: '#ffffff', frequence: 'une sur 740', lecture: 'hors de proportions', test: (e) => e >= 3, seuil: 3 },
-];
+export interface BandeSigma { bande: string; couleur: string; frequence: string; lecture: string; test: (e: number) => boolean; seuil: number | null }
+export function legendeSigma(langue: Langue = 'fr'): BandeSigma[] {
+  const fr = langue === 'fr';
+  return [
+    { bande: fr ? 'moins de 1 σ' : 'less than 1 σ', couleur: '#6da7ec', frequence: fr ? 'le cas courant — 2 évaluations sur 3' : 'the usual case, 2 assessments in 3', lecture: fr ? 'dans la norme' : 'within the norm', test: (e) => Math.abs(e) < 1, seuil: null },
+    { bande: fr ? 'au-delà de +1 σ' : 'beyond +1 σ', couleur: '#9ec5f4', frequence: fr ? 'une évaluation sur 6 se situe aussi loin au-dessus de la médiane' : 'one assessment in 6 sits this far above the median', lecture: fr ? 'significativement élevée' : 'significantly high', test: (e) => e >= 1 && e < 2, seuil: 1 },
+    { bande: fr ? 'au-delà de +2 σ' : 'beyond +2 σ', couleur: '#cde2fb', frequence: fr ? 'une sur 44' : 'one in 44', lecture: fr ? 'très significativement élevée' : 'very significantly high', test: (e) => e >= 2 && e < 3, seuil: 2 },
+    { bande: fr ? 'au-delà de +3 σ' : 'beyond +3 σ', couleur: '#ffffff', frequence: fr ? 'une sur 740' : 'one in 740', lecture: fr ? 'hors de proportions' : 'out of proportion', test: (e) => e >= 3, seuil: 3 },
+  ];
+}
+export const LEGENDE_SIGMA = legendeSigma('fr');
 
 /** Part observée du groupe au-delà d'un seuil (en σ), d'après l'histogramme ; null si indisponible. */
 export function partObservee(histo: Histo | null | undefined, seuil: number | null): { n: number; total: number } | null {
@@ -135,7 +140,6 @@ export function partObservee(histo: Histo | null | undefined, seuil: number | nu
   const total = histo.comptes.reduce((a, b) => a + b, 0) + histo.sous + histo.sur;
   if (total === 0) return null;
   if (seuil == null) {
-    // dans ±1 σ
     let n = 0;
     histo.comptes.forEach((c, i) => { const x0 = histo.de + i * histo.pas; if (x0 >= -1 && x0 + histo.pas <= 1) n += c; });
     return { n, total };

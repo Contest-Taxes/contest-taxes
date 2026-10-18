@@ -1,8 +1,13 @@
 'use client';
 import { FormEvent, ReactNode, useState } from 'react';
 import type { GroupeSql, Verdict } from '@/lib/pretri/types';
-import CourbeSigma, { COMPS, LEGENDE_SIGMA, formaterUneSur, partObservee, uneSur } from '@/components/CourbeSigma';
+import CourbeSigma, { COMPS, legendeSigma, formaterUneSur, partObservee, uneSur } from '@/components/CourbeSigma';
 import CourbeHistorique from '@/components/CourbeHistorique';
+import { useLangue } from '@/lib/i18n/LangueProvider';
+import { fmtNombre, t } from '@/lib/i18n/textes';
+import type { Langue } from '@/lib/i18n/langue';
+import { motsClesVerdict } from '@/lib/pretri/verdict';
+import { decrireComparables } from '@/lib/pretri/comparables';
 
 const TEINTE: Record<string, string> = {
   avantageux: 'border-emerald-200 bg-emerald-50',
@@ -11,11 +16,6 @@ const TEINTE: Record<string, string> = {
   solide: 'border-orange-300 bg-orange-50',
   hors_proportions: 'border-red-300 bg-red-50',
 };
-
-const nombre = (v: number, d = 0) =>
-  v.toLocaleString('fr-CA', { minimumFractionDigits: d, maximumFractionDigits: d });
-const pct = (v: number) => (v >= 0 ? '+' : '−') + nombre(Math.abs(v), 1) + ' %';
-const sig = (v: number) => (v >= 0 ? '+' : '−') + nombre(Math.abs(v), 1) + ' σ';
 
 type Sujet = 'comparables' | 'sigma';
 
@@ -38,164 +38,101 @@ function Declencheur({ sujet, ouvrir, actif, children }: {
   );
 }
 
+const echapper = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 // Le message du verdict est une chaîne identique à celle du moteur Python ;
 // on y insère les déclencheurs sans en changer un mot.
-function MessageAvecDeclencheurs({ texte, ouvrir, actif }: {
-  texte: string; ouvrir: (s: Sujet, epingler?: boolean) => void; actif: Sujet | null;
+function MessageAvecDeclencheurs({ texte, ouvrir, actif, mots }: {
+  texte: string; ouvrir: (s: Sujet, epingler?: boolean) => void; actif: Sujet | null; mots: [string, string];
 }) {
-  const morceaux = texte.split(/(bâtiments comparables|écarts-types)/);
+  const morceaux = texte.split(new RegExp(`(${echapper(mots[0])}|${echapper(mots[1])})`));
   return (
     <p className="mt-3 leading-relaxed">
       {morceaux.map((m, i) => {
-        if (m === 'bâtiments comparables') {
-          return <Declencheur key={i} sujet="comparables" ouvrir={ouvrir} actif={actif === 'comparables'}>{m}</Declencheur>;
-        }
-        if (m === 'écarts-types') {
-          return <Declencheur key={i} sujet="sigma" ouvrir={ouvrir} actif={actif === 'sigma'}>{m}</Declencheur>;
-        }
+        if (m === mots[0]) return <Declencheur key={i} sujet="comparables" ouvrir={ouvrir} actif={actif === 'comparables'}>{m}</Declencheur>;
+        if (m === mots[1]) return <Declencheur key={i} sujet="sigma" ouvrir={ouvrir} actif={actif === 'sigma'}>{m}</Declencheur>;
         return <span key={i}>{m}</span>;
       })}
     </p>
   );
 }
 
-function plage(p: [number | null, number | null] | undefined, unite = '', brut = false): string | null {
-  if (!p || p[0] == null || p[1] == null) return null;
-  const f = (v: number) => (brut ? String(v) : nombre(v));   // années : sans séparateur de milliers
-  return p[0] === p[1] ? `${f(p[0])}${unite}` : `de ${f(p[0])} à ${f(p[1])}${unite}`;
-}
-
-function PanneauComparables({ g }: { g: GroupeSql }) {
-  const parDistance = g.rayon_m != null;
-  const fin = g.niveau === 'cellule et logements';
-  const etages = plage(g.etages);
-  const annees = plage(g.annees, '', true);
-  const aire = plage(g.aire_m2, ' m²');
-  const rayon = g.rayon_m != null ? (g.rayon_m >= 1000 ? `${g.rayon_m / 1000} km` : `${g.rayon_m} m`) : null;
-  const plancher = g.classe === 'plex' ? 2 : 1;
-  const logMin = g.logements != null ? Math.max(plancher, g.logements - 1) : null;
-  const logMax = g.logements != null ? Math.min(5, g.logements + 1) : null;
-  const mentionLogements = g.classe == null || g.classe === 'plex' || (g.logements ?? 1) > 1;
-  const quoi = g.classe === 'maison' ? 'maisons unifamiliales'
-    : g.classe === 'condo' ? 'condos'
-    : g.classe === 'plex' ? 'plex'
-    : 'bâtiments résidentiels';
-  const feminin = g.classe === 'maison';
-  const situes = feminin ? 'situées' : 'situés';
-  const votre = feminin ? 'de la vôtre' : 'du vôtre';
-  const finesse = g.classe === 'maison' ? 'Même voisinage, maisons unifamiliales seulement, même taille'
-    : g.classe === 'condo' ? 'Même voisinage, condos seulement, même taille'
-    : g.classe === 'plex' ? 'Même voisinage, plex seulement, même taille, même nombre de logements à un près'
-    : 'Même voisinage, même taille, même nombre de logements à un près';
+function PanneauComparables({ g, langue }: { g: GroupeSql; langue: Langue }) {
+  const T = t(langue).formulaire;
+  const d = decrireComparables(g, langue);
   return (
     <div>
-      <h3 className="font-semibold">Vos bâtiments comparables</h3>
-      {parDistance ? (
-        <p className="mt-2 text-sm leading-relaxed">
-          Les <strong>{nombre(g.n)} {quoi}</strong> {situes} à moins de <strong>{rayon}</strong> {votre},
-          {mentionLogements && logMin != null && logMax != null && (
-            <> de <strong>{logMin === logMax ? `${logMin}` : `${logMin} à ${logMax}`} logement{(logMax ?? 0) > 1 ? 's' : ''}</strong>
-              {g.logements != null && ` (le vôtre : ${g.logements})`},</>
-          )}
-          {g.aire_sujet_m2 != null && (
-            <> d’aire {g.classe === 'condo' ? 'de partie privative' : 'd’étages'} à <strong>±20 %</strong> de la vôtre ({nombre(g.aire_sujet_m2)} m²)</>
-          )}
-          {g.rues.length > 0 ? <>, autour de : {g.rues.join(', ')}</> : null}.
-        </p>
-      ) : (
-        <p className="mt-2 text-sm leading-relaxed">
-          Les <strong>{nombre(g.n)} immeubles</strong>{' '}
-          {fin ? <>de <strong>{g.logements} logement{(g.logements ?? 0) > 1 ? 's' : ''}</strong> </> : <>résidentiels de 1 à 5 logements </>}
-          de votre cellule cadastrale, un carré d’environ 1 km de côté.
-        </p>
+      <h3 className="font-semibold">{T.compTitre}</h3>
+      <p className="mt-2 text-sm leading-relaxed">{d.phrase}</p>
+      {d.details.length > 0 && (
+        <dl className="mt-3 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-sm">
+          {d.details.map(([k, v]) => <div key={k} className="contents"><dt className="text-gray-500">{k}</dt><dd>{v}</dd></div>)}
+        </dl>
       )}
-      <dl className="mt-3 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-sm">
-        {aire && <><dt className="text-gray-500">{g.classe === 'condo' ? 'Aire privative' : 'Aire d’étages'}</dt><dd>{aire}</dd></>}
-        {etages && <><dt className="text-gray-500">Étages</dt><dd>{etages}</dd></>}
-        {annees && <><dt className="text-gray-500">Construction</dt><dd>{annees}</dd></>}
-      </dl>
-      <p className="mt-3 text-xs leading-relaxed text-gray-600">
-        {parDistance
-          ? (g.rayon_m != null && g.rayon_m > 500
-              ? `Trop peu de bâtiments comparables à moins de 500 m : le rayon a été élargi à ${rayon}.`
-              : `${finesse} : la comparaison la plus fine que permettent les données publiques.`)
-          : (fin
-              ? 'Même cellule, même nombre de logements : la comparaison la plus fine que permettent les données publiques.'
-              : 'Trop peu d’immeubles de même taille dans la cellule : la comparaison porte sur toute la cellule.')}{' '}
-        Les bâtiments agrandis entre les deux rôles en sont exclus. Aucun ajustement pour
-        l’âge ou l’état : c’est un tri, pas une évaluation.
-      </p>
+      <p className="mt-3 text-xs leading-relaxed text-gray-600">{d.note}</p>
     </div>
   );
 }
 
-function PanneauSigma({ ecart, histo, superposer, setSuperposer }: {
-  ecart: number;
-  histo: GroupeSql['histogramme'] | null;
-  superposer: boolean;
-  setSuperposer: (v: boolean) => void;
+function PanneauSigma({ ecart, histo, superposer, setSuperposer, langue }: {
+  ecart: number; histo: GroupeSql['histogramme'] | null; superposer: boolean; setSuperposer: (v: boolean) => void; langue: Langue;
 }) {
+  const T = t(langue).formulaire;
   const h = superposer ? histo : null;
+  const sig = (v: number) => (v >= 0 ? '+' : '−') + fmtNombre(langue, Math.abs(v), 1);
   return (
     <div>
-      <h3 className="font-semibold">Lire un écart-type</h3>
-      <p className="mt-2 text-sm leading-relaxed">
-        Deux immeubles voisins ne reçoivent jamais exactement la même hausse. La question
-        n’est pas « êtes-vous au-dessus de la médiane », mais « de combien, comparé à
-        l’écart habituel entre vos comparables ». C’est ce que mesure l’écart-type, noté σ.
-      </p>
+      <h3 className="font-semibold">{T.lireEcart}</h3>
+      <p className="mt-2 text-sm leading-relaxed">{T.lireEcartTexte}</p>
       <div className="mt-3 rounded-lg border bg-white p-2">
-        <CourbeSigma ecart={ecart} histo={h} />
+        <CourbeSigma ecart={ecart} histo={h} langue={langue} />
       </div>
       {histo && (
         <label className="mt-2 flex cursor-pointer items-start gap-2 text-xs text-gray-700">
           <input type="checkbox" checked={superposer} onChange={(e) => setSuperposer(e.target.checked)} className="mt-0.5" />
           <span>
-            Superposer la distribution réelle de vos comparables{' '}
+            {T.expSuper}{' '}
             <span className="inline-block h-2.5 w-2.5 rounded-sm align-middle" style={{ backgroundColor: COMPS, opacity: 0.7 }} />{' '}
-            <span className="text-gray-500">(expérimental)</span>
+            <span className="text-gray-500">{T.expMention}</span>
           </span>
         </label>
       )}
       {ecart > 0 ? (
         <p className="mt-3 text-sm leading-relaxed">
-          À <strong>{(ecart >= 0 ? '+' : '−') + nombre(Math.abs(ecart), 1)} σ</strong>, {formaterUneSur(uneSur(ecart))} se situe
-          aussi loin au-dessus de la médiane, si les hausses suivaient une loi normale.
+          {T.aSigma} <strong>{sig(ecart)} σ</strong>, {formaterUneSur(uneSur(ecart), langue)} {T.aSigmaSuite}
         </p>
       ) : (
         <p className="mt-3 text-sm leading-relaxed">
-          Votre immeuble est <strong>sous la médiane</strong> de son secteur : la question d’une
-          hausse « élevée » ne se pose pas.
+          {T.sousMediane} <strong>{T.sousMedianeFort}</strong> {T.sousMedianeSuite}
         </p>
       )}
       <ul className="mt-3 space-y-1.5 text-xs leading-snug">
-        {LEGENDE_SIGMA.map((l) => {
+        {legendeSigma(langue).map((l) => {
           const ici = l.test(ecart);
           const obs = h ? partObservee(h, l.seuil) : null;
           return (
             <li key={l.bande} className={`flex gap-2 ${ici ? 'rounded-md bg-black/5 p-1.5 font-semibold' : 'text-gray-600'}`}>
               <span className="mt-0.5 inline-block h-3 w-3 shrink-0 rounded-sm border" style={{ backgroundColor: l.couleur }} />
               <span>
-                <strong>{l.bande}</strong> — {l.frequence} : {l.lecture}{ici ? ' ← vous' : ''}
+                <strong>{l.bande}</strong> — {l.frequence} : {l.lecture}{ici ? ` ${T.vous}` : ''}
                 {obs && (
-                  <span className="ml-1 font-normal" style={{ color: COMPS }}>
-                    {' '}· observé dans votre secteur : {obs.n} sur {obs.total}
-                  </span>
+                  <span className="ml-1 font-normal" style={{ color: COMPS }}> · {T.observe} {obs.n} {T.sur} {obs.total}</span>
                 )}
               </span>
             </li>
           );
         })}
       </ul>
-      <p className="mt-3 text-xs leading-relaxed text-gray-500">
-        Fréquences d’une loi normale, lues vers le haut. Les bandes bleues valent 1, 2 et 3 écarts-types de part et d’autre de la médiane.
-      </p>
+      <p className="mt-3 text-xs leading-relaxed text-gray-500">{T.frequences}</p>
     </div>
   );
 }
 
 export default function PretriForm() {
+  const { langue } = useLangue();
+  const T = t(langue).formulaire;
   const [adresse, setAdresse] = useState('');
+  const [adresseVerdict, setAdresseVerdict] = useState('');
   const [appartement, setAppartement] = useState('');
   const [chargement, setChargement] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
@@ -203,13 +140,18 @@ export default function PretriForm() {
   const [panneau, setPanneau] = useState<Sujet | null>(null);
   const [epingle, setEpingle] = useState(false);
   const [superposer, setSuperposer] = useState(false);
+  const [pdfEnCours, setPdfEnCours] = useState(false);
+
+  const nombre = (v: number, d = 0) => fmtNombre(langue, v, d);
+  const pct = (v: number) => (v >= 0 ? '+' : '−') + nombre(Math.abs(v), 1) + (langue === 'fr' ? ' %' : '%');
+  const sig = (v: number) => (v >= 0 ? '+' : '−') + nombre(Math.abs(v), 1) + ' σ';
 
   function ouvrir(s: Sujet, epingler = false) {
     if (epingler) {
       if (panneau === s && epingle) { setPanneau(null); setEpingle(false); return; }
       setEpingle(true);
     } else if (epingle) {
-      return; // un panneau épinglé ne change pas au simple survol
+      return;
     }
     setPanneau(s);
   }
@@ -224,13 +166,13 @@ export default function PretriForm() {
       const rep = await fetch('/api/pretri', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ adresse: a }),
+        body: JSON.stringify({ adresse: a, langue }),
       });
       const corps = await rep.json();
-      if (!rep.ok) setErreur(corps.erreur ?? 'Une erreur est survenue.');
-      else setVerdict(corps as Verdict);
+      if (!rep.ok) setErreur(corps.erreur ?? T.erreur);
+      else { setVerdict(corps as Verdict); setAdresseVerdict(a); }
     } catch {
-      setErreur('Impossible de joindre le service. Vérifiez votre connexion et réessayez.');
+      setErreur(T.erreurReseau);
     } finally {
       setChargement(false);
     }
@@ -241,7 +183,6 @@ export default function PretriForm() {
     if (adresse.trim()) chercher(adresse);
   }
 
-  // Une piste cliquée (voie approchante, numéro voisin) remplace la saisie.
   function suivrePiste(piste: string) {
     const m = adresse.trim().match(/^(\d+(?:\s*[-–]\s*\d+)?)\s+/);
     const nouvelle = /^\d/.test(piste) ? piste : `${m ? m[1] : ''} ${piste}`.trim();
@@ -249,28 +190,54 @@ export default function PretriForm() {
     chercher(nouvelle);
   }
 
-  // Copropriété : le numéro d'appartement saisi s'ajoute à l'adresse, après une virgule.
   function chercherUnite(num: string) {
     const nouvelle = `${adresse.trim().replace(/[\s,]+$/, '')}, app. ${num.trim()}`;
     setAdresse(nouvelle);
     chercher(nouvelle);
   }
 
+  async function telechargerPdf() {
+    if (!adresseVerdict) return;
+    setPdfEnCours(true);
+    setErreur(null);
+    try {
+      const rep = await fetch('/api/analyse-preliminaire', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ adresse: adresseVerdict, langue }),
+      });
+      if (!rep.ok) {
+        const corps = await rep.json().catch(() => ({}));
+        setErreur(corps.erreur ?? T.erreur);
+        return;
+      }
+      const blob = await rep.blob();
+      const nom = decodeURIComponent(rep.headers.get('X-Nom-Fichier') ?? 'analyse-preliminaire.pdf');
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = nom; a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      setErreur(T.erreurReseau);
+    } finally {
+      setPdfEnCours(false);
+    }
+  }
+
   const c = verdict?.chiffres ?? null;
   const u = verdict?.unite ?? null;
   const g = verdict?.groupe ?? null;
   const peutExpliquer = Boolean(c && c.ecart_sigma != null);
+  const mots = motsClesVerdict(langue);
 
   return (
     <div>
       <form onSubmit={onSubmit} className="flex max-w-2xl flex-col gap-3 rounded-2xl border border-ct-ligne bg-white p-3 shadow-lg shadow-black/5 sm:flex-row">
-        <label className="sr-only" htmlFor="adresse">Adresse de l’immeuble</label>
+        <label className="sr-only" htmlFor="adresse">{T.label}</label>
         <input
           id="adresse"
           name="adresse"
           value={adresse}
           onChange={(e) => setAdresse(e.target.value)}
-          placeholder="Ex. : 1482 Rue Marie-Anne Est, Montréal"
+          placeholder={T.placeholder}
           autoComplete="street-address"
           maxLength={120}
           required
@@ -281,28 +248,23 @@ export default function PretriForm() {
           disabled={chargement}
           className="rounded-xl bg-ct-vert px-6 py-3 text-lg font-semibold text-white transition hover:bg-ct-vert-fonce disabled:opacity-50"
         >
-          {chargement ? 'Recherche…' : 'Vérifier'}
+          {chargement ? T.recherche : T.verifier}
         </button>
       </form>
-      <p className="mt-3 text-sm text-ct-gris">Gratuit, sans compte. Aucune adresse n’est conservée. En copropriété, ajoutez votre numéro d’appartement, par exemple « 1155 rue de la Montagne, app. 316 ».</p>
+      <p className="mt-3 text-sm text-ct-gris">{T.aide}</p>
 
       {erreur && (
-        <div role="alert" className="mt-6 max-w-2xl rounded-xl border border-red-200 bg-ct-rouge-pale p-4 text-ct-rouge">
-          {erreur}
-        </div>
+        <div role="alert" className="mt-6 max-w-2xl rounded-xl border border-red-200 bg-ct-rouge-pale p-4 text-ct-rouge">{erreur}</div>
       )}
 
       {verdict && (
         <div className="mt-6 grid items-start gap-4 lg:grid-cols-[minmax(0,42rem)_minmax(18rem,1fr)]">
-          <section
-            aria-live="polite"
-            className={`rounded-2xl border p-6 shadow-sm ${TEINTE[verdict.categorie] ?? 'border-ct-ligne bg-white'}`}
-          >
+          <section aria-live="polite" className={`rounded-2xl border p-6 shadow-sm ${TEINTE[verdict.categorie] ?? 'border-ct-ligne bg-white'}`}>
             {u && (
               <p className="mb-3 text-sm text-gray-600">
-                Immeuble trouvé : <strong>{u.adresse}</strong>
-                {u.logements != null && ` · ${u.logements} logement${u.logements > 1 ? 's' : ''}`}
-                {u.annee_construction != null && ` · construit en ${u.annee_construction}`}
+                {T.trouve} <strong>{u.adresse}</strong>
+                {u.logements != null && ` · ${u.logements} ${u.logements > 1 ? T.logements : T.logement}`}
+                {u.annee_construction != null && ` · ${T.construit} ${u.annee_construction}`}
                 {u.categorie && u.categorie !== 'Régulier' && ` · ${u.categorie}`}
               </p>
             )}
@@ -313,18 +275,14 @@ export default function PretriForm() {
             )}
             <h2 className="text-2xl font-semibold">{verdict.titre}</h2>
             {peutExpliquer
-              ? <MessageAvecDeclencheurs texte={verdict.message} ouvrir={ouvrir} actif={panneau} />
+              ? <MessageAvecDeclencheurs texte={verdict.message} ouvrir={ouvrir} actif={panneau} mots={mots} />
               : <p className="mt-3 leading-relaxed">{verdict.message}</p>}
 
             {verdict.pistes.length > 0 && (
               <ul className="mt-3 flex flex-wrap gap-2">
                 {verdict.pistes.map((p, i) => (
                   <li key={`${i}-${p}`}>
-                    <button
-                      type="button"
-                      onClick={() => suivrePiste(p)}
-                      className="rounded-full border border-ct-ligne bg-white px-3 py-1 text-sm transition hover:border-ct-vert hover:bg-ct-vert-pale"
-                    >
+                    <button type="button" onClick={() => suivrePiste(p)} className="rounded-full border border-ct-ligne bg-white px-3 py-1 text-sm transition hover:border-ct-vert hover:bg-ct-vert-pale">
                       {p}
                     </button>
                   </li>
@@ -333,48 +291,30 @@ export default function PretriForm() {
             )}
 
             {verdict.appartement_requis && (
-              <form
-                onSubmit={(e) => { e.preventDefault(); if (appartement.trim()) chercherUnite(appartement); }}
-                className="mt-4 flex flex-wrap items-end gap-3"
-              >
+              <form onSubmit={(e) => { e.preventDefault(); if (appartement.trim()) chercherUnite(appartement); }} className="mt-4 flex flex-wrap items-end gap-3">
                 <label className="text-sm text-gray-700">
-                  Numéro d’appartement
-                  <input
-                    name="appartement"
-                    value={appartement}
-                    onChange={(e) => setAppartement(e.target.value)}
-                    placeholder="316"
-                    maxLength={8}
-                    required
-                    className="mt-1 block w-32 rounded-lg border border-ct-ligne px-3 py-2 text-base outline-none transition focus:border-ct-vert focus:ring-2 focus:ring-ct-vert/20"
-                  />
+                  {T.appartement}
+                  <input name="appartement" value={appartement} onChange={(e) => setAppartement(e.target.value)} placeholder="316" maxLength={8} required
+                    className="mt-1 block w-32 rounded-lg border border-ct-ligne px-3 py-2 text-base outline-none transition focus:border-ct-vert focus:ring-2 focus:ring-ct-vert/20" />
                 </label>
-                <button
-                  type="submit"
-                  disabled={chargement}
-                  className="rounded-lg bg-ct-vert px-4 py-2 font-semibold text-white transition hover:bg-ct-vert-fonce disabled:opacity-50"
-                >
-                  Vérifier cette unité
+                <button type="submit" disabled={chargement} className="rounded-lg bg-ct-vert px-4 py-2 font-semibold text-white transition hover:bg-ct-vert-fonce disabled:opacity-50">
+                  {T.verifierUnite}
                 </button>
               </form>
             )}
 
             {c && c.ecart_sigma != null && (
               <dl className="mt-5 grid grid-cols-2 gap-x-6 gap-y-2 text-sm sm:grid-cols-3">
-                <div><dt className="text-gray-500">Rôle précédent</dt><dd className="font-medium">{nombre(c.valeur_precedente)} $</dd></div>
-                <div><dt className="text-gray-500">Rôle {c.role_libelle}</dt><dd className="font-medium">{nombre(c.valeur_proposee)} $</dd></div>
-                <div><dt className="text-gray-500">Votre hausse</dt><dd className="font-medium">{pct(c.hausse_pct)}</dd></div>
-                <div><dt className="text-gray-500">Médiane du secteur</dt><dd className="font-medium">{c.secteur_mediane_pct != null ? pct(c.secteur_mediane_pct) : '—'}</dd></div>
+                <div><dt className="text-gray-500">{T.rolePrec}</dt><dd className="font-medium">{langue === 'fr' ? `${nombre(c.valeur_precedente)} $` : `$${nombre(c.valeur_precedente)}`}</dd></div>
+                <div><dt className="text-gray-500">{T.role} {c.role_libelle}</dt><dd className="font-medium">{langue === 'fr' ? `${nombre(c.valeur_proposee)} $` : `$${nombre(c.valeur_proposee)}`}</dd></div>
+                <div><dt className="text-gray-500">{T.hausse}</dt><dd className="font-medium">{pct(c.hausse_pct)}</dd></div>
+                <div><dt className="text-gray-500">{T.mediane}</dt><dd className="font-medium">{c.secteur_mediane_pct != null ? pct(c.secteur_mediane_pct) : '—'}</dd></div>
                 <div>
-                  <dt className="text-gray-500">
-                    <Declencheur sujet="comparables" ouvrir={ouvrir} actif={panneau === 'comparables'}>Bâtiments comparables</Declencheur>
-                  </dt>
+                  <dt className="text-gray-500"><Declencheur sujet="comparables" ouvrir={ouvrir} actif={panneau === 'comparables'}>{T.comparables}</Declencheur></dt>
                   <dd className="font-medium">{c.n_comparables ?? '—'}</dd>
                 </div>
                 <div>
-                  <dt className="text-gray-500">
-                    <Declencheur sujet="sigma" ouvrir={ouvrir} actif={panneau === 'sigma'}>Écart</Declencheur>
-                  </dt>
+                  <dt className="text-gray-500"><Declencheur sujet="sigma" ouvrir={ouvrir} actif={panneau === 'sigma'}>{T.ecart}</Declencheur></dt>
                   <dd className="font-medium">{sig(c.ecart_sigma)}</dd>
                 </div>
               </dl>
@@ -384,74 +324,57 @@ export default function PretriForm() {
               <div className="mt-5 border-t border-black/10 pt-4">
                 <p className="text-sm text-gray-800">
                   {verdict.enjeu}
-                  <sup className="ml-px text-[0.7em] leading-none">
-                    <a href="#note-taux" className="text-ct-vert hover:underline" aria-label="Source du taux de taxation">1</a>
-                  </sup>
+                  <sup className="ml-px text-[0.7em] leading-none"><a href="#note-taux" className="text-ct-vert hover:underline">1</a></sup>
                 </p>
                 {verdict.frais_texte && verdict.frais && (
                   <p className="mt-2 text-sm text-gray-800">
                     {verdict.frais_texte}
-                    <sup className="ml-px text-[0.7em] leading-none">
-                      <a href="#note-frais" className="text-ct-vert hover:underline" aria-label="Source des frais de révision">2</a>
-                    </sup>
+                    <sup className="ml-px text-[0.7em] leading-none"><a href="#note-frais" className="text-ct-vert hover:underline">2</a></sup>
                   </p>
                 )}
                 <p id="note-taux" className="mt-2 text-xs leading-relaxed text-gray-500">
-                  1. Source du taux :{' '}
-                  <a
-                    href={verdict.taux.source_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="underline decoration-ct-ligne underline-offset-2 hover:text-ct-encre"
-                  >
-                    {verdict.taux.source_libelle}
-                  </a>
-                  . Le taux de {verdict.taux.niveau === 'arrondissement' ? 'l’arrondissement' : 'la municipalité'} additionne
-                  les taxes calculées sur la valeur de l’immeuble ; il change chaque année.
+                  1. {T.noteTaux}{' '}
+                  <a href={verdict.taux.source_url} target="_blank" rel="noopener noreferrer" className="underline decoration-ct-ligne underline-offset-2 hover:text-ct-encre">{verdict.taux.source_libelle}</a>
+                  . {verdict.taux.niveau === 'arrondissement' ? T.deArr : T.deMun} {T.noteTauxSuite}
                 </p>
                 {verdict.frais_texte && verdict.frais && (
                   <p id="note-frais" className="mt-1 text-xs leading-relaxed text-gray-500">
-                    2. Source des frais :{' '}
-                    <a
-                      href={verdict.frais.source_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="underline decoration-ct-ligne underline-offset-2 hover:text-ct-encre"
-                    >
-                      {verdict.frais.source_libelle}
-                    </a>
-                    . Le barème dépend de la valeur inscrite au rôle au moment de la demande.
+                    2. {T.noteFrais}{' '}
+                    <a href={verdict.frais.source_url} target="_blank" rel="noopener noreferrer" className="underline decoration-ct-ligne underline-offset-2 hover:text-ct-encre">{verdict.frais.source_libelle}</a>
+                    . {T.noteFraisSuite}
                   </p>
                 )}
               </div>
             )}
 
-            {verdict.reserve && (
-              <p className="mt-5 border-t border-black/10 pt-4 text-sm text-gray-700">{verdict.reserve}</p>
-            )}
+            {verdict.reserve && <p className="mt-5 border-t border-black/10 pt-4 text-sm text-gray-700">{verdict.reserve}</p>}
 
             {verdict.historique.length >= 1 && (
               <div className="mt-5 border-t border-black/10 pt-4">
-                <h3 className="font-semibold">Votre immeuble au fil des rôles</h3>
+                <h3 className="font-semibold">{T.histoTitre}</h3>
                 <div className="mt-2 rounded-xl border border-ct-ligne bg-white p-2">
-                  <CourbeHistorique historique={verdict.historique} />
+                  <CourbeHistorique historique={verdict.historique} langue={langue} />
                 </div>
-                <p className="mt-2 text-xs leading-relaxed text-ct-gris">
-                  Valeurs inscrites à la fin de chaque rôle, après révisions. Une évaluation se conteste au dépôt de chaque
-                  nouveau rôle, dans les délais prévus : suivre cette courbe tous les trois ans, c’est ne pas laisser passer
-                  le moment où une hausse hors norme peut encore être revue.
-                </p>
+                <p className="mt-2 text-xs leading-relaxed text-ct-gris">{T.histoNote}</p>
+              </div>
+            )}
+
+            {c && (
+              <div className="mt-5 flex flex-wrap items-center gap-3 border-t border-black/10 pt-4">
+                <button type="button" onClick={telechargerPdf} disabled={pdfEnCours}
+                  className="rounded-xl border border-ct-vert px-4 py-2 font-semibold text-ct-vert transition hover:bg-ct-vert-pale disabled:opacity-50">
+                  {pdfEnCours ? T.pdfEnCours : T.pdf}
+                </button>
+                <span className="text-xs text-ct-gris">{T.pdfNote}</span>
               </div>
             )}
 
             {verdict.rapport_recommande && (
               <div className="mt-6">
-                <a href="/contact" className="inline-block rounded-xl bg-ct-vert px-5 py-3 font-semibold text-white transition hover:bg-ct-vert-fonce">
-                  Poursuivre : nous écrire pour le rapport complet →
+                <a href={`/dashboard?adresse=${encodeURIComponent(adresseVerdict)}`} className="inline-block rounded-xl bg-ct-vert px-5 py-3 font-semibold text-white transition hover:bg-ct-vert-fonce">
+                  {T.poursuivre}
                 </a>
-                <p className="mt-2 text-sm text-gray-600">
-                  Le rapport compare votre évaluation aux ventes réelles de votre secteur, celles que la Ville vous affiche. Parcours en ligne et prise de contact à venir.
-                </p>
+                <p className="mt-2 text-sm text-gray-600">{T.poursuivreNote}</p>
               </div>
             )}
 
@@ -460,35 +383,17 @@ export default function PretriForm() {
               (verdict.categorie === 'appartement_inconnu' && verdict.pistes.length === 0) ||
               verdict.categorie === 'batiment_modifie' || verdict.categorie === 'indeterminable' ||
               verdict.categorie === 'ville_non_couverte') && (
-              <p className="mt-5"><a href="/contact" className="underline">Nous joindre →</a></p>
+              <p className="mt-5"><a href="/contact" className="underline">{T.joindre}</a></p>
             )}
           </section>
 
           {peutExpliquer && (
-            <aside
-              className={`rounded-2xl border border-ct-ligne bg-white p-5 shadow-sm transition-opacity ${panneau ? 'opacity-100' : 'hidden lg:block lg:opacity-60'}`}
-              aria-live="polite"
-            >
-              {panneau === 'comparables' && g && <PanneauComparables g={g} />}
+            <aside className={`rounded-2xl border border-ct-ligne bg-white p-5 shadow-sm transition-opacity ${panneau ? 'opacity-100' : 'hidden lg:block lg:opacity-60'}`} aria-live="polite">
+              {panneau === 'comparables' && g && <PanneauComparables g={g} langue={langue} />}
               {panneau === 'sigma' && c && c.ecart_sigma != null && (
-                <PanneauSigma ecart={c.ecart_sigma} histo={g?.histogramme ?? null} superposer={superposer} setSuperposer={setSuperposer} />
+                <PanneauSigma ecart={c.ecart_sigma} histo={g?.histogramme ?? null} superposer={superposer} setSuperposer={setSuperposer} langue={langue} />
               )}
-              {!panneau && (
-                <p className="text-sm text-gray-500">
-                  Survolez <span className="underline decoration-dotted decoration-2 underline-offset-4">bâtiments comparables</span> ou{' '}
-                  <span className="underline decoration-dotted decoration-2 underline-offset-4">écarts-types</span> dans le verdict pour voir
-                  ce qui est comparé, et comment lire l’écart.
-                </p>
-              )}
-              {panneau && (
-                <button
-                  type="button"
-                  onClick={() => { setPanneau(null); setEpingle(false); }}
-                  className="mt-4 text-xs text-gray-500 underline"
-                >
-                  Fermer
-                </button>
-              )}
+              {!panneau && <p className="text-sm text-gray-500">{T.panneauVide}</p>}
             </aside>
           )}
         </div>

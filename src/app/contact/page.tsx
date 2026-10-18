@@ -1,23 +1,31 @@
-import Link from 'next/link';
+import ContactForm from '@/components/ContactForm';
+import { langueServeur } from '@/lib/i18n/serveur';
+import { t } from '@/lib/i18n/textes';
 
-export default function Page() {
+const COURRIEL = 'contact@contest-taxes.ca';
+
+export async function generateMetadata() {
+  const langue = await langueServeur();
+  return langue === 'fr'
+    ? { title: 'Nous joindre — Contest-Taxes', description: 'Écrivez à Contest-Taxes : contact@contest-taxes.ca ou le formulaire de cette page.' }
+    : { title: 'Contact — Contest-Taxes', description: 'Write to Contest-Taxes: contact@contest-taxes.ca or the form on this page.' };
+}
+
+export default async function Page() {
+  const langue = await langueServeur();
+  const T = t(langue).contact;
   return (
     <section className="max-w-2xl">
-      <h1 className="text-3xl font-bold tracking-tight">Nous joindre</h1>
-      <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-6 text-justify leading-relaxed shadow-sm hyphens-auto" lang="fr">
-        <p className="font-medium">Le formulaire de contact n’est pas encore en service.</p>
-        <p className="mt-2 text-ct-encre">
-          Contest-Taxes est en cours de mise en place. L’adresse courriel officielle sera
-          publiée ici dès qu’elle sera prête. D’ici là, aucun message ne peut nous être
-          transmis par ce site — revenez dans quelques jours.
-        </p>
-        <p className="mt-2 text-sm text-ct-gris">
-          Le pré-tri de la page d’accueil fonctionne, lui, dès maintenant.
-        </p>
-      </div>
-      <p className="mt-6 text-sm">
-        <Link href="/" className="underline">← Retour au pré-tri</Link>
+      <h1 className="text-3xl font-bold tracking-tight">{T.titre}</h1>
+      <p className="mt-4 leading-relaxed">
+        {T.intro1}{' '}
+        <a href={`mailto:${COURRIEL}`} className="font-medium text-ct-vert underline decoration-ct-ligne underline-offset-2 hover:text-ct-vert-fonce">{COURRIEL}</a>{' '}
+        {T.intro2}
       </p>
+      <p className="mt-2 text-sm text-ct-gris">
+        {T.dossier1} <a href="/dashboard" className="underline">{T.dossier2}</a>.
+      </p>
+      <ContactForm />
     </section>
   );
 }

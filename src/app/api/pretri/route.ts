@@ -3,6 +3,7 @@ import { createHash } from 'node:crypto';
 import { getSupabaseServeur } from '@/lib/supabaseServer';
 import { verdict } from '@/lib/pretri/verdict';
 import type { ResultatSql } from '@/lib/pretri/types';
+import { normaliserLangue } from '@/lib/i18n/langue';
 
 // Le pré-tri : une adresse entre, un verdict sort. Tout se passe côté serveur ;
 // le navigateur ne voit ni la base ni la clé. Une seule adresse par requête,
@@ -23,7 +24,7 @@ function empreinteIp(req: Request): string {
 }
 
 export async function POST(req: Request) {
-  let corps: { adresse?: unknown } = {};
+  let corps: { adresse?: unknown; langue?: unknown } = {};
   try {
     corps = await req.json();
   } catch {
@@ -48,7 +49,8 @@ export async function POST(req: Request) {
     );
   }
   const resultat = data as ResultatSql;
-  const v = verdict(resultat, adresse);
+  const langue = normaliserLangue(typeof corps.langue === 'string' ? corps.langue : undefined);
+  const v = verdict(resultat, adresse, langue);
 
   // L'immeuble au fil des rôles : transitions antérieures (table compacte) et courante.
   if (resultat?.matricule && (resultat.trouve || resultat.categorie === 'hors_champ')) {

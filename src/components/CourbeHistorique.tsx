@@ -1,4 +1,5 @@
 import type { TransitionSql } from '@/lib/pretri/types';
+import type { Langue } from '@/lib/i18n/langue';
 
 // L'immeuble au fil des rôles : sa valeur à chaque rôle depuis 2017, reliée
 // par une ligne, chaque point coloré selon la position de la hausse par rapport
@@ -6,7 +7,7 @@ import type { TransitionSql } from '@/lib/pretri/types';
 const COULEURS = {
   inconnu: '#a3a8a4', bas: '#6da7ec', norme: '#367b3a', eleve: '#d97706', tres: '#ea580c', hors: '#ba2a24',
 };
-function teinte(e: number | null, modifie: boolean): keyof typeof COULEURS {
+export function teinteHistorique(e: number | null, modifie: boolean): keyof typeof COULEURS {
   if (modifie || e == null) return 'inconnu';
   if (e <= -1) return 'bas';
   if (e < 1) return 'norme';
@@ -14,21 +15,19 @@ function teinte(e: number | null, modifie: boolean): keyof typeof COULEURS {
   if (e < 3) return 'tres';
   return 'hors';
 }
-const LECTURE: Record<keyof typeof COULEURS, string> = {
-  inconnu: 'non comparable', bas: 'sous les comparables', norme: 'dans la norme',
-  eleve: 'élevée', tres: 'très élevée', hors: 'hors de proportions',
-};
+export const COULEURS_HISTORIQUE = COULEURS;
+export function lectureHistorique(langue: Langue): Record<keyof typeof COULEURS, string> {
+  return langue === 'fr'
+    ? { inconnu: 'non comparable', bas: 'sous les comparables', norme: 'dans la norme', eleve: 'élevée', tres: 'très élevée', hors: 'hors de proportions' }
+    : { inconnu: 'not comparable', bas: 'below the comparables', norme: 'within the norm', eleve: 'high', tres: 'very high', hors: 'out of proportion' };
+}
 
-const argent = (v: number) =>
-  v >= 1e6 ? `${(v / 1e6).toFixed(2).replace('.', ',')} M$` : `${Math.round(v / 1000)} k$`;
-const pct = (v: number) => (v >= 0 ? '+' : '−') + Math.abs(v).toFixed(1).replace('.', ',') + ' %';
-
-export default function CourbeHistorique({ historique }: { historique: TransitionSql[] }) {
+/** Points de la courbe : le rôle antérieur de la première transition, puis le rôle d'arrivée de chacune. */
+export function pointsHistorique(historique: TransitionSql[]) {
   const h = historique.filter((t) => t.valeur_apres != null && t.role_libelle);
-  if (h.length === 0) return null;
-  // Points : le rôle antérieur de la première transition, puis le rôle d'arrivée de chacune.
   const debut = (lib: string) => parseInt(lib.slice(0, 4), 10);
   const points: { annee: number; valeur: number; hausse: number | null; ecart: number | null; modifie: boolean; n: number | null }[] = [];
+  if (h.length === 0) return points;
   const first = h[0];
   if (first.valeur_avant != null) {
     points.push({ annee: debut(first.role_libelle!) - 3, valeur: first.valeur_avant, hausse: null, ecart: null, modifie: false, n: null });
@@ -36,6 +35,16 @@ export default function CourbeHistorique({ historique }: { historique: Transitio
   for (const t of h) {
     points.push({ annee: debut(t.role_libelle!), valeur: t.valeur_apres!, hausse: t.hausse_pct, ecart: t.ecart_sigma, modifie: t.batiment_modifie, n: t.n_comparables });
   }
+  return points;
+}
+
+export default function CourbeHistorique({ historique, langue = 'fr' }: { historique: TransitionSql[]; langue?: Langue }) {
+  const fr = langue === 'fr';
+  const argent = (v: number) =>
+    v >= 1e6 ? `${(v / 1e6).toFixed(2).replace('.', fr ? ',' : '.')} M$` : `${Math.round(v / 1000)} k$`;
+  const pct = (v: number) => (v >= 0 ? '+' : '−') + (fr ? Math.abs(v).toFixed(1).replace('.', ',') + ' %' : Math.abs(v).toFixed(1) + '%');
+  const LECTURE = lectureHistorique(langue);
+  const points = pointsHistorique(historique);
   if (points.length < 2) return null;
 
   const L = 360, H = 170, G = 14, D = 14, HAUT = 30, BAS = 36;
@@ -48,11 +57,11 @@ export default function CourbeHistorique({ historique }: { historique: Transitio
   return (
     <div>
       <svg viewBox={`0 0 ${L} ${H}`} role="img" className="w-full"
-           aria-label={`Valeur au rôle de ${points[0].annee} à ${points[points.length - 1].annee}`}>
+           aria-label={fr ? `Valeur au rôle de ${points[0].annee} à ${points[points.length - 1].annee}` : `Roll value from ${points[0].annee} to ${points[points.length - 1].annee}`}>
         <line x1={G} y1={H - BAS} x2={L - D} y2={H - BAS} stroke="#c3c2b7" />
         <path d={trace} fill="none" stroke="#184f95" strokeWidth={1.5} />
         {points.map((p, i) => {
-          const k = teinte(p.ecart, p.modifie);
+          const k = teinteHistorique(p.ecart, p.modifie);
           return (
             <g key={p.annee}>
               <circle cx={px(i)} cy={py(p.valeur)} r={5} fill={COULEURS[k]} stroke="#fff" strokeWidth={1.5} />
@@ -67,13 +76,16 @@ export default function CourbeHistorique({ historique }: { historique: Transitio
       </svg>
       <ul className="mt-1 grid gap-x-4 gap-y-1 text-xs text-ct-gris sm:grid-cols-2">
         {points.slice(1).map((p) => {
-          const k = teinte(p.ecart, p.modifie);
+          const k = teinteHistorique(p.ecart, p.modifie);
+          const e = p.ecart != null ? (p.ecart >= 0 ? '+' : '−') + (fr ? Math.abs(p.ecart).toFixed(1).replace('.', ',') : Math.abs(p.ecart).toFixed(1)) : '';
           return (
             <li key={p.annee} className="flex items-start gap-2">
               <span className="mt-1 inline-block h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: COULEURS[k] }} />
               <span>
-                Rôle {p.annee} : {p.hausse != null ? pct(p.hausse) : '—'}
-                {p.ecart != null && !p.modifie ? ` — ${LECTURE[k]} (${(p.ecart >= 0 ? '+' : '−') + Math.abs(p.ecart).toFixed(1).replace('.', ',')} σ sur ${p.n} comparables)` : ` — ${LECTURE[k]}`}
+                {fr ? 'Rôle' : 'Roll'} {p.annee} : {p.hausse != null ? pct(p.hausse) : '—'}
+                {p.ecart != null && !p.modifie
+                  ? ` — ${LECTURE[k]} (${e} σ ${fr ? 'sur' : 'over'} ${p.n} ${fr ? 'comparables' : 'comparables'})`
+                  : ` — ${LECTURE[k]}`}
               </span>
             </li>
           );
