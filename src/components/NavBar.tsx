@@ -18,6 +18,7 @@ export default function NavBar() {
     { href: '/contact', label: T.nav.contact },
   ];
   const autre = langue === 'fr' ? 'en' : 'fr';
+  const espaceActif = ['/auth', '/dashboard', '/admin'].some((p) => pathname?.startsWith(p));
   return (
     <header className="sticky top-0 z-40 bg-ct-encre text-white">
       <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-x-6 gap-y-2 px-6 py-3">
@@ -45,7 +46,8 @@ export default function NavBar() {
           })}
           <Link
             href="/auth"
-            className="ml-2 whitespace-nowrap rounded-full border border-white/35 px-3.5 py-2 text-white transition-colors hover:border-white hover:bg-white/10"
+            aria-current={espaceActif ? 'page' : undefined}
+            className={`ml-2 whitespace-nowrap rounded-full border border-white/35 px-3.5 py-2 text-white transition-colors hover:border-white hover:bg-white/10 ${espaceActif ? 'bg-white/12' : ''}`}
           >
             {T.nav.espace}
           </Link>

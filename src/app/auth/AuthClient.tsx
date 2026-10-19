@@ -6,6 +6,7 @@ import { ThemeSupa } from '@supabase/auth-ui-shared';
 import { getSupabase } from '@/lib/supabaseClient';
 import { useLangue } from '@/lib/i18n/LangueProvider';
 import { t } from '@/lib/i18n/textes';
+import Bandeau from '@/components/espace/Bandeau';
 
 // Inscription et connexion (Supabase Auth, courriel + mot de passe). Le
 // paramètre « next » ramène l'usager où il allait : « Ouvrir un dossier »
@@ -47,7 +48,7 @@ export default function AuthClient() {
   const { langue } = useLangue();
   const T = t(langue).auth;
   return (
-    <Suspense fallback={<main className="mx-auto max-w-md p-6">{T.chargement}</main>}>
+    <Suspense fallback={<div className="conteneur">{T.chargement}</div>}>
       <Formulaire />
     </Suspense>
   );
@@ -79,29 +80,43 @@ function Formulaire() {
   }, [router, next]);
 
   if (indisponible) {
-    return <main className="mx-auto max-w-md p-6">{T.indisponible} <a className="underline" href="/contact">{t(langue).nav.contact}</a>.</main>;
+    return <div className="conteneur">{T.indisponible} <a className="underline" href="/contact">{t(langue).nav.contact}</a>.</div>;
   }
-  if (!client) return <main className="mx-auto max-w-md p-6">{T.chargement}</main>;
+  if (!client) return <div className="conteneur">{T.chargement}</div>;
 
   return (
-    <main className="mx-auto max-w-md">
-      <h1 className="text-3xl font-bold tracking-tight">{T.titre}</h1>
-      <p className="mt-3 text-ct-gris">{T.intro}</p>
-      <div className="mt-6 rounded-2xl border border-ct-ligne bg-white p-6 shadow-sm">
-        <Auth
-          supabaseClient={client}
-          view="sign_in"
-          providers={[]}
-          magicLink={false}
-          localization={langue === 'fr' ? FR : undefined}
-          redirectTo={origine ? `${origine}/auth?next=${encodeURIComponent(next)}` : undefined}
-          appearance={{
-            theme: ThemeSupa,
-            variables: { default: { colors: { brand: '#367b3a', brandAccent: '#2a6130' }, radii: { borderRadiusButton: '12px', inputBorderRadius: '12px' } } },
-          }}
-        />
+    <>
+      <Bandeau surtitre="Contest-Taxes" titre={T.titre} sousTitre={T.intro} />
+      <div className="conteneur grid items-start gap-8 lg:grid-cols-12">
+        <div className="lg:col-span-5">
+          <div className="rounded-2xl border border-ct-ligne bg-white p-6 shadow-[0_10px_30px_rgba(30,34,35,0.06)]">
+            <Auth
+              supabaseClient={client}
+              view="sign_in"
+              providers={[]}
+              magicLink={false}
+              localization={langue === 'fr' ? FR : undefined}
+              redirectTo={origine ? `${origine}/auth?next=${encodeURIComponent(next)}` : undefined}
+              appearance={{
+                theme: ThemeSupa,
+                variables: { default: { colors: { brand: '#367b3a', brandAccent: '#2a6130' }, radii: { borderRadiusButton: '12px', inputBorderRadius: '12px' } } },
+              }}
+            />
+          </div>
+          <p className="mt-4 text-xs text-ct-gris">{T.confirmation}</p>
+        </div>
+        <section aria-labelledby="titre-avantages" className="flex flex-col gap-4 rounded-2xl bg-ct-fond p-7 lg:col-span-7">
+          <h2 id="titre-avantages" className="font-display text-[26px] font-medium">{T.avantagesTitre}</h2>
+          <ol className="flex flex-col gap-4">
+            {[T.avantage1, T.avantage2, T.avantage3].map((a, i) => (
+              <li key={i} className="flex items-start gap-4">
+                <span aria-hidden="true" className="font-display text-[34px] leading-none text-ct-vert">{String(i + 1).padStart(2, '0')}</span>
+                <span className="pt-1 leading-relaxed">{a}</span>
+              </li>
+            ))}
+          </ol>
+        </section>
       </div>
-      <p className="mt-4 text-xs text-ct-gris">{T.confirmation}</p>
-    </main>
+    </>
   );
 }

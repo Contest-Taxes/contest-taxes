@@ -53,3 +53,14 @@ body {
   margin-right: auto;
   padding: 2rem 1.5rem;
 }
+
+/* Texte justifié partout sur le site (demande de Guillaume, 2026-10-19), avec
+   césure selon la langue de la page. Dans la couche de base : une classe
+   utilitaire (text-center, text-right) l'emporte quand un élément le demande. */
+@layer base {
+  p, li, dd, blockquote, figcaption, td {
+    text-align: justify;
+    -webkit-hyphens: auto;
+    hyphens: auto;
+  }
+}

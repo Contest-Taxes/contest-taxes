@@ -229,8 +229,8 @@ export default function PretriForm({ couverture, exemple }: { couverture: Couver
 
   return (
     <div>
-      <section className="bg-ct-encre px-6 pb-16 pt-12 text-white">
-        <div className="mx-auto grid max-w-7xl gap-8 lg:gap-12 lg:grid-cols-12 lg:items-start">
+      <section className="bg-ct-encre pb-16 pt-12 text-white">
+        <div className="mx-auto grid max-w-7xl gap-8 px-6 lg:grid-cols-12 lg:items-start lg:gap-12">
           <div className="flex flex-col gap-4 lg:col-span-7">
             <div className="flex flex-wrap gap-2">
               {badges.map((c) => (

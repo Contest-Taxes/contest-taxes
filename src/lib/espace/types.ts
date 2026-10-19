@@ -11,6 +11,15 @@ export const STATUTS: Record<Statut, string> = {
   ferme: 'Dossier fermé',
 };
 
+/** Liseré des cartes et pastille de statut (système visuel, 2026-10-19). */
+export const STYLE_STATUT: Record<Statut, { lisere: string; pastille: string }> = {
+  nouveau: { lisere: 'border-l-[#a3a8a4]', pastille: 'bg-[#f0f1ef] text-ct-encre' },
+  ventes_recues: { lisere: 'border-l-[#d97706]', pastille: 'bg-[#fff7e6] text-[#8a4b08]' },
+  en_analyse: { lisere: 'border-l-[#d97706]', pastille: 'bg-[#fff7e6] text-[#8a4b08]' },
+  rapport_disponible: { lisere: 'border-l-ct-vert', pastille: 'bg-ct-vert-pale text-ct-vert-fonce' },
+  ferme: { lisere: 'border-l-[#c3c2b7]', pastille: 'bg-[#f0f1ef] text-ct-gris' },
+};
+
 /** Ce qui attend le client à chaque étape. */
 export const PROCHAINE_ETAPE: Record<Statut, string> = {
   nouveau:

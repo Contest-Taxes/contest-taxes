@@ -3,7 +3,8 @@ import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { getSupabase } from '@/lib/supabaseClient';
-import { nomFichierRapport, type MessageContact, type Rapport, type Statut } from '@/lib/espace/types';
+import { STYLE_STATUT, nomFichierRapport, type MessageContact, type Rapport, type Statut } from '@/lib/espace/types';
+import Bandeau from '@/components/espace/Bandeau';
 import { useLangue } from '@/lib/i18n/LangueProvider';
 import { fmtDate, t } from '@/lib/i18n/textes';
 
@@ -87,23 +88,23 @@ export default function AdminClient() {
     if (error) setErreur(error.message); else charger();
   }
 
-  if (autorise === null) return <main className="max-w-4xl">…</main>;
-  if (!autorise) return <main className="max-w-4xl"><p>{T.reserve}</p><p className="mt-3"><Link href="/dashboard" className="underline">{TE.retour}</Link></p></main>;
+  if (autorise === null) return <div className="conteneur">…</div>;
+  if (!autorise) return <div className="conteneur"><p>{T.reserve}</p><p className="mt-3"><Link href="/dashboard" className="underline">{TE.retour}</Link></p></div>;
 
   return (
-    <main className="max-w-4xl">
-      <p className="text-sm"><Link href="/dashboard" className="underline">{TE.retour}</Link></p>
-      <h1 className="mt-2 text-3xl font-bold tracking-tight">{T.titre}</h1>
-      {erreur && <p role="alert" className="mt-4 rounded-xl border border-red-200 bg-ct-rouge-pale p-3 text-sm text-ct-rouge">{erreur}</p>}
+    <>
+    <Bandeau retour={{ href: '/dashboard', libelle: TE.retour }} surtitre={TE.surtitre} titre={T.titre} />
+    <div className="conteneur">
+      {erreur && <p role="alert" className="mb-4 rounded-xl border border-red-200 bg-ct-rouge-pale p-3 text-sm text-ct-rouge">{erreur}</p>}
 
-      <section className="mt-6">
-        <h2 className="text-xl font-semibold">{T.dossiers} ({dossiers.length})</h2>
+      <section>
+        <h2 className="font-display text-[26px] font-medium">{T.dossiers} ({dossiers.length})</h2>
         <div className="mt-3 grid gap-3">
           {dossiers.map((d) => (
-            <div key={d.id} className="rounded-2xl border border-ct-ligne bg-white p-4 shadow-sm">
+            <div key={d.id} className={`rounded-2xl border border-ct-ligne border-l-[6px] bg-white px-6 py-5 shadow-[0_10px_30px_rgba(30,34,35,0.05)] ${(STYLE_STATUT[d.statut] ?? STYLE_STATUT.nouveau).lisere}`}>
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
-                  <Link href={`/dashboard/dossier/${d.id}`} className="font-semibold underline decoration-ct-ligne underline-offset-2 hover:text-ct-vert">{d.adresse}</Link>
+                  <Link href={`/dashboard/dossier/${d.id}`} className="font-display text-[22px] font-medium hover:text-ct-vert">{d.adresse}</Link>
                   <p className="text-sm text-ct-gris">
                     {d.profils?.nom ? `${d.profils.nom} · ` : ''}{d.profils?.courriel ?? d.proprietaire} · {T.ouvertLe} {fmtDate(langue, d.cree_le)} · {d.dossier_ventes?.[0]?.count ?? 0} {T.ventes}
                     {' · '}{d.langue.toUpperCase()}
@@ -134,7 +135,7 @@ export default function AdminClient() {
       </section>
 
       <section className="mt-10">
-        <h2 className="text-xl font-semibold">{T.messages} ({messages.filter((m) => !m.traite).length} {T.aTraiter})</h2>
+        <h2 className="font-display text-[26px] font-medium">{T.messages} ({messages.filter((m) => !m.traite).length} {T.aTraiter})</h2>
         <div className="mt-3 grid gap-3">
           {messages.map((m) => (
             <div key={m.id} className={`rounded-2xl border p-4 shadow-sm ${m.traite ? 'border-ct-ligne bg-gray-50 text-ct-gris' : 'border-ct-ligne bg-white'}`}>
@@ -151,6 +152,7 @@ export default function AdminClient() {
           {messages.length === 0 && <p className="text-ct-gris">{T.aucunMessage}</p>}
         </div>
       </section>
-    </main>
+    </div>
+    </>
   );
 }
