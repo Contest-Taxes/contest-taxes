@@ -208,7 +208,7 @@ export function DocumentAnalyse({ verdict: v, adresse, langue, logo, genereLe }:
     sousMediane: 'The building is below the median of its sector: the question of a high increase does not arise.',
     limite1: '“Within the norm” means “nothing unusual compared with the neighbours”, not “fair”. If a whole sector is overassessed, only actual sales show it. And after a recent sale, the new value often reflects the price paid.',
     limite2: 'This analysis compares values entered on the roll, not sale prices, and adjusts neither for age nor for condition. It is not a professional appraisal.',
-    suiteTexte: 'A request for review rests on the sale prices of comparable properties, not on the neighbours’ roll values: municipalities say so themselves. That is the analysis the full report performs, from the sales in the sector. To go further: contest-taxes.ca.',
+    suiteTexte: 'An application for review rests on the sale prices of comparable properties, not on the neighbours’ roll values: municipalities say so themselves. That is the analysis the full report performs, from the sales in the sector. To go further: contest-taxes.ca.',
     sourceTaux: 'Rate source:', sourceFrais: 'Fee source:',
     pied: 'Contest-Taxes · contest-taxes.ca · Statistical analysis of property assessments · Not a professional appraisal',
     page: (p: number, t: number) => `page ${p} of ${t}`,

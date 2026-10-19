@@ -122,7 +122,7 @@ const en: typeof fr = {
   accueil: {
     titre: 'Does your new property assessment look out of line?',
     intro1: 'Every three years, your municipality files a new assessment roll, and you receive your new value without knowing how it compares with your neighbours’. The preliminary analysis answers that first question. Enter your address: in a second, we place your building’s increase among those of the comparable buildings in your sector, same type, house, condo or plex, similar size within 20%, within 500 m.',
-    intro2: 'The result tells you whether your increase is within the norm of your sector or departs from it. The preliminary analysis is only an indicator, however: it compares values entered on the roll, not sale prices, and a formal request for review cannot rest on it. Only the full analysis, based on sales of similar buildings, can serve that purpose.',
+    intro2: 'The result tells you whether your increase is within the norm of your sector or departs from it. The preliminary analysis is only an indicator, however: it compares values entered on the roll, not sale prices, and a formal application for review cannot rest on it. Only the full analysis, based on sales of similar buildings, can serve that purpose.',
     couvre: 'Covers',
     role: 'roll',
     millesime: 'year',
@@ -135,7 +135,7 @@ const en: typeof fr = {
     carte2t: 'What it cannot see',
     carte2: '“Within the norm” means “nothing unusual compared with your neighbours”, not “fair”. If a whole sector is overassessed, only actual sales show it. And after a recent sale, the new value often reflects the price paid.',
     carte3t: 'What comes next',
-    carte3: 'A request for review rests on the sale prices of comparable properties, not on the neighbours’ roll values: municipalities say so themselves. That is the analysis the full report performs, from the sales in your sector.',
+    carte3: 'An application for review rests on the sale prices of comparable properties, not on the neighbours’ roll values: municipalities say so themselves. That is the analysis the full report performs, from the sales in your sector.',
     source: 'Source: Québec property assessment rolls (MAMH, CC-BY 4.0 licence) and Ville de Montréal open data. Contest-Taxes is not a chartered appraiser; this preliminary analysis is an information tool, not a professional appraisal.',
   },
   formulaire: {
@@ -218,7 +218,7 @@ const en: typeof fr = {
       nouveau: 'Next step: submit the comparable sales of your sector, the ones the City shows you. If you would rather we collect them, say so in the file notes.',
       ventes_recues: 'We have your sales. The analysis begins; you will be notified when the report is filed here.',
       en_analyse: 'The report is being prepared. It will be filed in this file.',
-      rapport_disponible: 'Your report is ready: download it below. It compares the value entered on the roll with sales of similar buildings in your sector, and you can attach it to a request for review.',
+      rapport_disponible: 'Your report is ready: download it below. It compares the value entered on the roll with sales of similar buildings in your sector, and you can attach it to an application for review.',
       ferme: 'This file is closed. Write to us to reopen it.',
     },
   },

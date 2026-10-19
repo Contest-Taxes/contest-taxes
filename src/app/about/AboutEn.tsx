@@ -24,7 +24,7 @@ const NOTES: { id: number; texte: React.ReactNode }[] = [
     texte: (
       <>
         Tribunal administratif du logement,{' '}
-        <a href="https://www.tal.gouv.qc.ca/en/lease-renewal-and-rent-fixing/rent-increase" target="_blank" rel="noopener noreferrer" className={LIEN}>
+        <a href="https://www.tal.gouv.qc.ca/en/renewal-of-the-lease-and-fixing-of-rent/rent-increase" target="_blank" rel="noopener noreferrer" className={LIEN}>
           Rent increase
         </a>
         ;{' '}
@@ -42,7 +42,7 @@ const NOTES: { id: number; texte: React.ReactNode }[] = [
         <a href="https://www.legisquebec.gouv.qc.ca/en/document/cs/F-2.1#se:124" target="_blank" rel="noopener noreferrer" className={LIEN}>
           Act respecting municipal taxation
         </a>
-        , CQLR, c. F-2.1, s. 124 (request for review) and{' '}
+        , CQLR, c. F-2.1, s. 124 (application for review) and{' '}
         <a href="https://www.legisquebec.gouv.qc.ca/en/document/cs/F-2.1#se:130" target="_blank" rel="noopener noreferrer" className={LIEN}>
           130
         </a>{' '}
@@ -102,14 +102,14 @@ export default function AboutEn() {
           </p>
           <p>
             Strictly speaking, one does not contest one’s taxes. The law<Appel n={3} /> provides instead
-            for a request for review of the assessment on which they rest. But it is the tax bill that
+            for an application for review of the assessment on which they rest. But it is the tax bill that
             arrives in your mailbox, and the tax bill that makes you react. We chose this name because that
             is where you start, and so that is where we start with you.
           </p>
           <p>
             Our tool promises no reduction. It helps owners form a better-informed opinion of their new
             assessment, from public data. Most will find it within the norm, and that will be good news.
-            The others will know it is worth a closer look before the deadline for a request for review.
+            The others will know it is worth a closer look before the deadline for an application for review.
           </p>
         </div>
         <ol className="mt-6 space-y-1.5 border-t border-ct-ligne pt-4 text-sm leading-snug text-ct-gris" lang="en">

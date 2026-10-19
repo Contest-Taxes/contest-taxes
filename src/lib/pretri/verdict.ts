@@ -104,7 +104,7 @@ function textes(langue: Langue, adresseSaisie: string) {
       return debut + `sits ${f.points(e)} ${e > 0 ? 'above' : 'below'} that increase.`;
     },
     frais: (fr: FraisSql) =>
-      `Filing a request for review with ${fr.nom} costs ${f.montant(fr.frais)} for a building of this value, under the ${fr.annee} fee schedule.` +
+      `Filing an application for review with ${fr.nom} costs ${f.montant(fr.frais)} for a building of this value, under the ${fr.annee} fee schedule.` +
       (fr.remboursement ? ' ' + traduireRemboursement(fr.remboursement) : ''),
     enjeu: (valeurPrecedente: number, e: number, tx: TauxSql) => {
       const cout = arrondir(valeurPrecedente * 0.01 * tx.taux_pct / 100);
@@ -142,13 +142,13 @@ function textes(langue: Langue, adresseSaisie: string) {
     indeterminable: ['Not enough similar buildings to decide', 'Your sector has too few buildings of the same category to support a reliable comparison. A full analysis, based on a wider neighbourhood, remains possible.'],
     commun: (role: string | null, prec: number, prop: number, hausse: number, n: number | null, med: number) =>
       `On the ${role} roll, your building goes from ${f.dollars(prec)} to ${f.dollars(prop)}, a change of ${f.pct(hausse)}. The ${n} comparable buildings in your sector saw ${f.pct(med)} at the median.`,
-    avantageux: (commun: string) => ['Your assessment is lower than that of similar buildings', `${commun} You are well below. Note that a request for review reopens the assessment in both directions, and the assessor may also revise it upward.`],
+    avantageux: (commun: string) => ['Your assessment is lower than that of similar buildings', `${commun} You are well below. Note that an application for review reopens the assessment in both directions, and the assessor may also revise it upward.`],
     conformeTitre: 'Your assessment appears within the norm',
     margeUniforme: 'A gap of less than 2 percentage points stays within the rounding margin of the method.',
     margeOrdinaire: 'The gap stays within the ordinary variation between similar buildings.',
     conformeFin: 'On the criterion of value alone, nothing sets your assessment apart from those of your comparables.',
     reserveEtat:
-      'This preliminary analysis only looks at value relative to comparables. The condition and particular features of your building also enter into its assessment: a sewer line to replace or foundations to stabilise, for example, weigh on its actual value. Putting figures on them is the work of a chartered appraiser, not ours, but they can be presented to the City’s assessor during a request for review, or to the Tribunal administratif du Québec.',
+      'This preliminary analysis only looks at value relative to comparables. The condition and particular features of your building also enter into its assessment: a sewer line to replace or foundations to stabilise, for example, weigh on its actual value. Putting figures on them is the work of a chartered appraiser, not ours, but they can be presented to the City’s assessor in an application for review, or to the Tribunal administratif du Québec.',
     hausseTitre: (force: string) => `Your increase ${force}`,
     inhabituel: 'A gap of this size is unusual between comparable buildings.',
     rang: (centile: number | null) => (centile != null ? `You are at the ${ordinal(centile)} percentile of your sector,` : 'You are'),

@@ -36,14 +36,14 @@ const NOTES: { id: number; texte: React.ReactNode }[] = [
       <>
         Québec.ca,{' '}
         <a
-          href="https://www.quebec.ca/en/housing-territory/land-information/property-assessment/request-review"
+          href="https://www.quebec.ca/habitation-territoire/information-fonciere/evaluation-fonciere/demander-revision"
           target="_blank"
           rel="noopener noreferrer"
           className={LIEN}
         >
-          Requesting a review of the property assessment roll
-        </a>
-        .
+          Demander la révision du rôle d’évaluation foncière
+        </a>{' '}
+        (in French; the page has no English version).
       </>
     ),
   },
@@ -139,7 +139,7 @@ export default function MissionEn() {
             </li>
             <li>
               <strong className="text-ct-encre">The report.</strong> Tables, figures and method, in a
-              document you can attach to your request for review, present to your municipality’s assessor
+              document you can attach to your application for review, present to your municipality’s assessor
               and, in case of disagreement, to the Tribunal administratif du Québec<Appel n={3} />.
             </li>
           </ol>
@@ -147,9 +147,9 @@ export default function MissionEn() {
       </section>
 
       <section className="mt-10" aria-labelledby="parcours">
-        <h2 id="parcours" className="text-2xl font-bold tracking-tight">The path of a request for review</h2>
+        <h2 id="parcours" className="text-2xl font-bold tracking-tight">The path of an application for review</h2>
         <p className={`mt-4 ${PARA}`} lang="en">
-          A request for review is filed with the municipal body responsible for assessment, generally
+          An application for review is filed with the municipal body responsible for assessment, generally
           before the May 1 following the coming into force of the roll, on the prescribed form and with the
           fee set by the municipality. The assessor studies the request, may meet the applicant or visit
           the building, and replies in writing. Failing an agreement, the law provides for a recourse to the
