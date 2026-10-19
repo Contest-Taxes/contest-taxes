@@ -1,6 +1,6 @@
 'use client';
 import { FormEvent, ReactNode, useState } from 'react';
-import type { GroupeSql, Verdict } from '@/lib/pretri/types';
+import type { CouvertureSql, GroupeSql, Verdict } from '@/lib/pretri/types';
 import CourbeSigma, { COMPS, legendeSigma, formaterUneSur, partObservee, uneSur } from '@/components/CourbeSigma';
 import CourbeHistorique from '@/components/CourbeHistorique';
 import { useLangue } from '@/lib/i18n/LangueProvider';
@@ -9,14 +9,6 @@ import type { Langue } from '@/lib/i18n/langue';
 import { motsClesVerdict } from '@/lib/pretri/verdict';
 import { decrireComparables } from '@/lib/pretri/comparables';
 import { telechargerAnalysePdf } from '@/lib/pretri/pdfClient';
-
-const TEINTE: Record<string, string> = {
-  avantageux: 'border-emerald-200 bg-emerald-50',
-  conforme: 'border-emerald-200 bg-emerald-50',
-  defendable: 'border-amber-300 bg-amber-50',
-  solide: 'border-orange-300 bg-orange-50',
-  hors_proportions: 'border-red-300 bg-red-50',
-};
 
 type Sujet = 'comparables' | 'sigma';
 
@@ -63,7 +55,7 @@ function PanneauComparables({ g, langue }: { g: GroupeSql; langue: Langue }) {
   const d = decrireComparables(g, langue);
   return (
     <div>
-      <h3 className="font-semibold">{T.compTitre}</h3>
+      <h3 className="font-display text-[22px] font-medium">{T.compTitre}</h3>
       <p className="mt-2 text-sm leading-relaxed">{d.phrase}</p>
       {d.details.length > 0 && (
         <dl className="mt-3 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-sm">
@@ -83,7 +75,7 @@ function PanneauSigma({ ecart, histo, superposer, setSuperposer, langue }: {
   const sig = (v: number) => (v >= 0 ? '+' : '−') + fmtNombre(langue, Math.abs(v), 1);
   return (
     <div>
-      <h3 className="font-semibold">{T.lireEcart}</h3>
+      <h3 className="font-display text-[22px] font-medium">{T.lireEcart}</h3>
       <p className="mt-2 text-sm leading-relaxed">{T.lireEcartTexte}</p>
       <div className="mt-3 rounded-lg border bg-white p-2">
         <CourbeSigma ecart={ecart} histo={h} langue={langue} />
@@ -129,9 +121,10 @@ function PanneauSigma({ ecart, histo, superposer, setSuperposer, langue }: {
   );
 }
 
-export default function PretriForm() {
+export default function PretriForm({ couverture }: { couverture: CouvertureSql[] }) {
   const { langue } = useLangue();
   const T = t(langue).formulaire;
+  const TA = t(langue).accueil;
   const [adresse, setAdresse] = useState('');
   const [adresseVerdict, setAdresseVerdict] = useState('');
   const [appartement, setAppartement] = useState('');
@@ -217,106 +210,149 @@ export default function PretriForm() {
   const peutExpliquer = Boolean(c && c.ecart_sigma != null);
   const mots = motsClesVerdict(langue);
 
+  const BORD: Record<string, string> = {
+    avantageux: 'border-l-ct-vert', conforme: 'border-l-ct-vert', defendable: 'border-l-amber-500',
+    solide: 'border-l-orange-500', hors_proportions: 'border-l-ct-rouge',
+  };
+  const fr = langue === 'fr';
+  const libelleRole = (c: CouvertureSql) => (c.role_libelle ? `${TA.role} ${c.role_libelle}` : `${TA.millesime} ${c.millesime}`);
+  const badges = couverture.length ? couverture : [{ ville: '66023', nom: 'Montréal', millesime: 2026, role_libelle: '2026-2027-2028', apercu: false, note: null }];
+  const CHIFFRES_EXEMPLE = fr
+    ? [['Votre hausse', '+1,0 %'], ['Médiane des comparables', '+5,0 %'], ['Bâtiments comparés', '92'], ['Un point de hausse', '96 $ / an']]
+    : [['Your increase', '+1.0%'], ['Median of the comparables', '+5.0%'], ['Buildings compared', '92'], ['One point of increase', '$96 / yr']];
+
   return (
     <div>
-      <form onSubmit={onSubmit} className="flex max-w-2xl flex-col gap-3 rounded-2xl border border-ct-ligne bg-white p-3 shadow-lg shadow-black/5 sm:flex-row">
-        <label className="sr-only" htmlFor="adresse">{T.label}</label>
-        <input
-          id="adresse"
-          name="adresse"
-          value={adresse}
-          onChange={(e) => setAdresse(e.target.value)}
-          placeholder={T.placeholder}
-          autoComplete="street-address"
-          maxLength={120}
-          required
-          className="flex-1 rounded-xl border border-ct-ligne px-4 py-3 text-lg outline-none transition focus:border-ct-vert focus:ring-2 focus:ring-ct-vert/20"
-        />
-        <button
-          type="submit"
-          disabled={chargement}
-          className="rounded-xl bg-ct-vert px-6 py-3 text-lg font-semibold text-white transition hover:bg-ct-vert-fonce disabled:opacity-50"
-        >
-          {chargement ? T.recherche : T.verifier}
-        </button>
-      </form>
-      <p className="mt-3 text-sm text-ct-gris">{T.aide}</p>
+      <section className="bg-ct-encre px-6 pb-16 pt-12 text-white">
+        <div className="mx-auto grid max-w-5xl gap-8 lg:grid-cols-12 lg:items-start">
+          <div className="flex flex-col gap-4 lg:col-span-7">
+            <div className="flex flex-wrap gap-2">
+              {badges.map((c) => (
+                <p key={c.ville} className="inline-flex items-center gap-2 rounded-full border border-white/30 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#e6ebe7]">
+                  <span className={`h-1.5 w-1.5 rounded-full ${c.apercu ? 'bg-[#f2b44c]' : 'bg-[#6fcf74]'}`} aria-hidden="true" />
+                  {c.nom} · {c.apercu ? `${TA.apercu}, ` : ''}{libelleRole(c)}
+                </p>
+              ))}
+            </div>
+            <h1 className="font-display text-[40px] font-medium leading-[1.08] tracking-tight sm:text-[52px] lg:text-[58px]">{TA.titre}</h1>
+            <p className="text-justify text-lg leading-relaxed text-ct-clair hyphens-auto" lang={langue}>{TA.intro1}</p>
+            <p className="text-justify leading-relaxed text-ct-clair hyphens-auto" lang={langue}>{TA.intro2}</p>
+            <form onSubmit={onSubmit} className="mt-1 flex flex-col gap-2.5 rounded-2xl bg-white p-2.5 sm:flex-row">
+              <label className="sr-only" htmlFor="adresse">{T.label}</label>
+              <input
+                id="adresse"
+                name="adresse"
+                value={adresse}
+                onChange={(e) => setAdresse(e.target.value)}
+                placeholder={T.placeholder}
+                autoComplete="street-address"
+                maxLength={120}
+                required
+                className="min-w-0 flex-1 rounded-xl border border-ct-ligne px-4 py-3.5 text-lg text-ct-encre outline-none transition focus:border-ct-vert focus:ring-2 focus:ring-ct-vert/20"
+              />
+              <button
+                type="submit"
+                disabled={chargement}
+                className="rounded-xl bg-ct-vert px-7 py-3.5 text-lg font-semibold text-white transition hover:bg-ct-vert-fonce disabled:opacity-50"
+              >
+                {chargement ? T.recherche : T.verifier}
+              </button>
+            </form>
+            <p className="text-sm text-[#b7bfba]">{T.aide}</p>
+          </div>
+          <aside className="flex flex-col gap-3.5 rounded-2xl border border-white/15 bg-white/[0.06] p-6 lg:col-span-5" aria-label={fr ? 'Ce que vous obtenez' : 'What you get'}>
+            <p className="text-xs font-semibold uppercase tracking-[0.1em] text-[#9fd3a3]">{fr ? 'En une seconde' : 'In one second'}</p>
+            <div className="grid grid-cols-2 gap-3.5">
+              {CHIFFRES_EXEMPLE.map(([k, v]) => (
+                <div key={k} className="rounded-xl bg-white/[0.06] p-3.5">
+                  <p className="text-xs text-[#b7bfba]">{k}</p>
+                  <p className="mt-1 whitespace-nowrap font-display text-[28px] leading-none text-white sm:text-[32px]">{v}</p>
+                </div>
+              ))}
+            </div>
+            <p className="text-[13px] leading-relaxed text-[#c9cfcb]">
+              {fr ? 'Exemple : le 1482 rue Marie-Anne Est, à Montréal. Le verdict complet, les comparables retenus et la lecture de l’écart s’affichent sous la barre de recherche.'
+                  : 'Example: 1482 rue Marie-Anne Est, in Montréal. The full verdict, the comparables retained and the reading of the deviation appear under the search bar.'}
+            </p>
+          </aside>
+        </div>
+      </section>
 
+      {(erreur || verdict) && <div className="conteneur pb-0">
       {erreur && (
-        <div role="alert" className="mt-6 max-w-2xl rounded-xl border border-red-200 bg-ct-rouge-pale p-4 text-ct-rouge">{erreur}</div>
+        <div role="alert" className="max-w-2xl rounded-xl border border-red-200 bg-ct-rouge-pale p-4 text-ct-rouge">{erreur}</div>
       )}
 
       {verdict && (
-        <div className="mt-6 grid items-start gap-4 lg:grid-cols-[minmax(0,42rem)_minmax(18rem,1fr)]">
-          <section aria-live="polite" className={`rounded-2xl border p-6 shadow-sm ${TEINTE[verdict.categorie] ?? 'border-ct-ligne bg-white'}`}>
+        <div className={`grid items-start gap-6 lg:grid-cols-12 ${erreur ? 'mt-6' : ''}`}>
+          <section aria-live="polite" className={`flex flex-col gap-3.5 rounded-2xl border border-ct-ligne border-l-[6px] bg-white px-8 py-7 shadow-lg shadow-black/5 lg:col-span-8 ${BORD[verdict.categorie] ?? 'border-l-ct-ligne'}`}>
             {u && (
-              <p className="mb-3 text-sm text-gray-600">
-                {T.trouve} <strong>{u.adresse}</strong>
+              <p className="text-sm text-ct-gris">
+                {T.trouve} <strong className="text-ct-encre">{u.adresse}</strong>
                 {u.logements != null && ` · ${u.logements} ${u.logements > 1 ? T.logements : T.logement}`}
                 {u.annee_construction != null && ` · ${T.construit} ${u.annee_construction}`}
                 {u.categorie && u.categorie !== 'Régulier' && ` · ${u.categorie}`}
               </p>
             )}
             {verdict.couverture?.apercu && verdict.couverture.note && (
-              <div className="mb-4 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm leading-relaxed text-amber-950" role="note">
-                {verdict.couverture.note}
-              </div>
+              <div className="rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm leading-relaxed text-amber-950" role="note">{verdict.couverture.note}</div>
             )}
-            <h2 className="text-2xl font-semibold">{verdict.titre}</h2>
+            <h2 className="font-display text-[32px] font-medium leading-[1.15]">{verdict.titre}</h2>
+            {verdict.categorie === 'conforme' && <p className="text-justify text-sm text-ct-gris">{T.poursuivreNormeNote}</p>}
             {peutExpliquer
               ? <MessageAvecDeclencheurs texte={verdict.message} ouvrir={ouvrir} actif={panneau} mots={mots} />
-              : <p className="mt-3 leading-relaxed">{verdict.message}</p>}
+              : <p className="leading-relaxed">{verdict.message}</p>}
 
             {verdict.pistes.length > 0 && (
-              <ul className="mt-3 flex flex-wrap gap-2">
+              <ul className="flex flex-wrap gap-2">
                 {verdict.pistes.map((p, i) => (
                   <li key={`${i}-${p}`}>
-                    <button type="button" onClick={() => suivrePiste(p)} className="rounded-full border border-ct-ligne bg-white px-3 py-1 text-sm transition hover:border-ct-vert hover:bg-ct-vert-pale">
-                      {p}
-                    </button>
+                    <button type="button" onClick={() => suivrePiste(p)} className="rounded-full border border-ct-ligne bg-white px-3 py-1 text-sm transition hover:border-ct-vert hover:bg-ct-vert-pale">{p}</button>
                   </li>
                 ))}
               </ul>
             )}
 
             {verdict.appartement_requis && (
-              <form onSubmit={(e) => { e.preventDefault(); if (appartement.trim()) chercherUnite(appartement); }} className="mt-4 flex flex-wrap items-end gap-3">
+              <form onSubmit={(e) => { e.preventDefault(); if (appartement.trim()) chercherUnite(appartement); }} className="flex flex-wrap items-end gap-3">
                 <label className="text-sm text-gray-700">
                   {T.appartement}
                   <input name="appartement" value={appartement} onChange={(e) => setAppartement(e.target.value)} placeholder="316" maxLength={8} required
                     className="mt-1 block w-32 rounded-lg border border-ct-ligne px-3 py-2 text-base outline-none transition focus:border-ct-vert focus:ring-2 focus:ring-ct-vert/20" />
                 </label>
-                <button type="submit" disabled={chargement} className="rounded-lg bg-ct-vert px-4 py-2 font-semibold text-white transition hover:bg-ct-vert-fonce disabled:opacity-50">
-                  {T.verifierUnite}
-                </button>
+                <button type="submit" disabled={chargement} className="rounded-lg bg-ct-vert px-4 py-2 font-semibold text-white transition hover:bg-ct-vert-fonce disabled:opacity-50">{T.verifierUnite}</button>
               </form>
             )}
 
             {c && c.ecart_sigma != null && (
-              <dl className="mt-5 grid grid-cols-2 gap-x-6 gap-y-2 text-sm sm:grid-cols-3">
-                <div><dt className="text-gray-500">{T.rolePrec}</dt><dd className="font-medium">{langue === 'fr' ? `${nombre(c.valeur_precedente)} $` : `$${nombre(c.valeur_precedente)}`}</dd></div>
-                <div><dt className="text-gray-500">{T.role} {c.role_libelle}</dt><dd className="font-medium">{langue === 'fr' ? `${nombre(c.valeur_proposee)} $` : `$${nombre(c.valeur_proposee)}`}</dd></div>
-                <div><dt className="text-gray-500">{T.hausse}</dt><dd className="font-medium">{pct(c.hausse_pct)}</dd></div>
-                <div><dt className="text-gray-500">{T.mediane}</dt><dd className="font-medium">{c.secteur_mediane_pct != null ? pct(c.secteur_mediane_pct) : '—'}</dd></div>
-                <div>
-                  <dt className="text-gray-500"><Declencheur sujet="comparables" ouvrir={ouvrir} actif={panneau === 'comparables'}>{T.comparables}</Declencheur></dt>
-                  <dd className="font-medium">{c.n_comparables ?? '—'}</dd>
+              <dl className="mt-1 grid grid-cols-2 gap-3.5 text-sm sm:grid-cols-3">
+                {[
+                  [T.rolePrec, langue === 'fr' ? `${nombre(c.valeur_precedente)} $` : `$${nombre(c.valeur_precedente)}`, null],
+                  [`${T.role} ${c.role_libelle}`, langue === 'fr' ? `${nombre(c.valeur_proposee)} $` : `$${nombre(c.valeur_proposee)}`, null],
+                  [T.hausse, pct(c.hausse_pct), null],
+                  [T.mediane, c.secteur_mediane_pct != null ? pct(c.secteur_mediane_pct) : '—', null],
+                ].map(([k, v]) => (
+                  <div key={k as string} className="rounded-xl bg-ct-fond p-3"><dt className="text-ct-gris">{k}</dt><dd className="mt-0.5 text-lg font-semibold">{v}</dd></div>
+                ))}
+                <div className="rounded-xl bg-ct-fond p-3">
+                  <dt className="text-ct-gris"><Declencheur sujet="comparables" ouvrir={ouvrir} actif={panneau === 'comparables'}>{T.comparables}</Declencheur></dt>
+                  <dd className="mt-0.5 text-lg font-semibold">{c.n_comparables ?? '—'}</dd>
                 </div>
-                <div>
-                  <dt className="text-gray-500"><Declencheur sujet="sigma" ouvrir={ouvrir} actif={panneau === 'sigma'}>{T.ecart}</Declencheur></dt>
-                  <dd className="font-medium">{sig(c.ecart_sigma)}</dd>
+                <div className="rounded-xl bg-ct-fond p-3">
+                  <dt className="text-ct-gris"><Declencheur sujet="sigma" ouvrir={ouvrir} actif={panneau === 'sigma'}>{T.ecart}</Declencheur></dt>
+                  <dd className="mt-0.5 text-lg font-semibold">{sig(c.ecart_sigma)}</dd>
                 </div>
               </dl>
             )}
 
             {verdict.enjeu && verdict.taux && (
-              <div className="mt-5 border-t border-black/10 pt-4">
-                <p className="text-sm text-gray-800">
+              <div className="border-t border-ct-ligne pt-3.5">
+                <p className="text-sm leading-relaxed text-[#3a403d]">
                   {verdict.enjeu}
                   <sup className="ml-px text-[0.7em] leading-none"><a href="#note-taux" className="text-ct-vert hover:underline">1</a></sup>
                 </p>
                 {verdict.frais_texte && verdict.frais && (
-                  <p className="mt-2 text-sm text-gray-800">
+                  <p className="mt-2 text-sm leading-relaxed text-[#3a403d]">
                     {verdict.frais_texte}
                     <sup className="ml-px text-[0.7em] leading-none"><a href="#note-frais" className="text-ct-vert hover:underline">2</a></sup>
                   </p>
@@ -336,10 +372,10 @@ export default function PretriForm() {
               </div>
             )}
 
-            {verdict.reserve && <p className="mt-5 border-t border-black/10 pt-4 text-sm text-gray-700">{verdict.reserve}</p>}
+            {verdict.reserve && <p className="border-t border-ct-ligne pt-3.5 text-sm leading-relaxed text-[#3a403d]">{verdict.reserve}</p>}
 
             {verdict.historique.length >= 1 && (
-              <div className="mt-5 border-t border-black/10 pt-4">
+              <div className="border-t border-ct-ligne pt-3.5">
                 <h3 className="font-semibold">{T.histoTitre}</h3>
                 <div className="mt-2 rounded-xl border border-ct-ligne bg-white p-2">
                   <CourbeHistorique historique={verdict.historique} langue={langue} />
@@ -349,21 +385,22 @@ export default function PretriForm() {
             )}
 
             {c && (
-              <div className="mt-5 flex flex-wrap items-center gap-3 border-t border-black/10 pt-4">
-                <button type="button" onClick={telechargerPdf} disabled={pdfEnCours}
-                  className="rounded-xl border border-ct-vert px-4 py-2 font-semibold text-ct-vert transition hover:bg-ct-vert-pale disabled:opacity-50">
-                  {pdfEnCours ? T.pdfEnCours : T.pdf}
-                </button>
-                <span className="text-xs text-ct-gris">{T.pdfNote}</span>
-              </div>
-            )}
-
-            {(verdict.rapport_recommande || verdict.categorie === 'conforme') && (
-              <div className="mt-6">
-                <a href={`/dashboard?adresse=${encodeURIComponent(adresseVerdict)}`} className="inline-block rounded-xl bg-ct-vert px-5 py-3 font-semibold text-white transition hover:bg-ct-vert-fonce">
-                  {verdict.rapport_recommande ? T.poursuivre : T.poursuivreNorme}
-                </a>
-                <p className="mt-2 text-sm text-gray-600">{verdict.rapport_recommande ? T.poursuivreNote : T.poursuivreNormeNote}</p>
+              <div className="flex flex-col gap-3 border-t border-ct-ligne pt-4">
+                <div className="flex flex-wrap items-center gap-3">
+                  <button type="button" onClick={telechargerPdf} disabled={pdfEnCours}
+                    className="rounded-xl border border-ct-encre px-4 py-3 font-semibold text-ct-encre transition hover:bg-ct-fond disabled:opacity-50">
+                    {pdfEnCours ? T.pdfEnCours : T.pdf}
+                  </button>
+                  <span className="text-xs text-ct-gris">{T.pdfNote}</span>
+                </div>
+                {(verdict.rapport_recommande || verdict.categorie === 'conforme') && (
+                  <>
+                    <a href={`/dashboard?adresse=${encodeURIComponent(adresseVerdict)}`} className="block rounded-xl bg-ct-encre px-5 py-3.5 text-center font-semibold text-white transition hover:bg-black">
+                      {verdict.rapport_recommande ? T.poursuivre : T.poursuivreNorme}
+                    </a>
+                    {verdict.rapport_recommande && <p className="text-sm text-ct-gris">{T.poursuivreNote}</p>}
+                  </>
+                )}
               </div>
             )}
 
@@ -372,12 +409,12 @@ export default function PretriForm() {
               (verdict.categorie === 'appartement_inconnu' && verdict.pistes.length === 0) ||
               verdict.categorie === 'batiment_modifie' || verdict.categorie === 'indeterminable' ||
               verdict.categorie === 'ville_non_couverte') && (
-              <p className="mt-5"><a href="/contact" className="underline">{T.joindre}</a></p>
+              <p><a href="/contact" className="underline">{T.joindre}</a></p>
             )}
           </section>
 
           {peutExpliquer && (
-            <aside className={`rounded-2xl border border-ct-ligne bg-white p-5 shadow-sm transition-opacity ${panneau ? 'opacity-100' : 'hidden lg:block lg:opacity-60'}`} aria-live="polite">
+            <aside className={`rounded-2xl border border-ct-ligne bg-ct-fond p-5 transition-opacity lg:col-span-4 ${panneau ? 'opacity-100' : 'hidden lg:block lg:opacity-70'}`} aria-live="polite">
               {panneau === 'comparables' && g && <PanneauComparables g={g} langue={langue} />}
               {panneau === 'sigma' && c && c.ecart_sigma != null && (
                 <PanneauSigma ecart={c.ecart_sigma} histo={g?.histogramme ?? null} superposer={superposer} setSuperposer={setSuperposer} langue={langue} />
@@ -387,6 +424,7 @@ export default function PretriForm() {
           )}
         </div>
       )}
+      </div>}
     </div>
   );
 }

@@ -9,5 +9,5 @@ export async function generateMetadata() {
 
 export default async function Page() {
   const langue = await langueServeur();
-  return langue === 'fr' ? <MissionFr /> : <MissionEn />;
+  return <div className="conteneur">{langue === 'fr' ? <MissionFr /> : <MissionEn />}</div>;
 }

@@ -2,7 +2,7 @@
 
 /* Palette tirée du logo : maison verte, flèche rouge, encre du mot-symbole. */
 :root {
-  --background: #fafaf8;
+  --background: #ffffff;
   --foreground: #1e2223;
   --ct-vert: #367b3a;
   --ct-vert-fonce: #2a6130;
@@ -12,6 +12,8 @@
   --ct-encre: #1e2223;
   --ct-gris: #5b6360;
   --ct-ligne: #e4e6e2;
+  --ct-fond: #f6f7f5;
+  --ct-clair: #d7ddd9;
 }
 
 @theme inline {
@@ -25,6 +27,9 @@
   --color-ct-encre: var(--ct-encre);
   --color-ct-gris: var(--ct-gris);
   --color-ct-ligne: var(--ct-ligne);
+  --color-ct-fond: var(--ct-fond);
+  --color-ct-clair: var(--ct-clair);
+  --font-display: var(--font-fraunces), Georgia, 'Times New Roman', serif;
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
 }
 
@@ -40,9 +45,11 @@ body {
   overflow-x: clip; /* les sections pleine largeur (calc(50% - 50vw)) ne doivent pas créer de défilement horizontal */
 }
 
-/* Le fond d'accueil : un dégradé très doux, teinté du vert du logo. */
-.fond-accueil {
-  background:
-    radial-gradient(60rem 28rem at 10% -10%, rgba(54, 123, 58, 0.13), transparent 60%),
-    radial-gradient(40rem 20rem at 95% 0%, rgba(186, 42, 36, 0.07), transparent 55%);
+/* Conteneur des pages : la largeur de lecture, centrée. Les bandeaux pleine largeur
+   (accueil) se placent hors de lui. */
+@utility conteneur {
+  max-width: 64rem;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 2rem 1.5rem;
 }

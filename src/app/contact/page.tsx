@@ -15,7 +15,7 @@ export default async function Page() {
   const langue = await langueServeur();
   const T = t(langue).contact;
   return (
-    <section className="max-w-2xl">
+    <section className="conteneur max-w-2xl">
       <h1 className="text-3xl font-bold tracking-tight">{T.titre}</h1>
       <p className="mt-4 leading-relaxed">
         {T.intro1}{' '}
