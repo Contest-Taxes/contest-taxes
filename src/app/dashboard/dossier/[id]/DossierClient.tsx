@@ -84,16 +84,16 @@ export default function DossierClient({ id }: { id: string }) {
     window.open(data.signedUrl, '_blank', 'noopener');
   }
 
-  if (dossier === undefined) return <main className="max-w-3xl">…</main>;
+  if (dossier === undefined) return <main className="max-w-5xl">…</main>;
   if (dossier === null) {
-    return <main className="max-w-3xl"><p>{T.inexistant}</p><p className="mt-3"><Link href="/dashboard" className="underline">{T.retour}</Link></p></main>;
+    return <main className="max-w-5xl"><p>{T.inexistant}</p><p className="mt-3"><Link href="/dashboard" className="underline">{T.retour}</Link></p></main>;
   }
   const c = dossier.unite?.chiffres ?? null;
   const u = dossier.unite?.unite ?? null;
   const nBonnes = apercu ? apercu.filter((v) => !v.probleme).length : 0;
 
   return (
-    <main className="max-w-3xl">
+    <main className="max-w-5xl">
       <p className="text-sm"><Link href="/dashboard" className="underline">{T.retour}</Link></p>
       <h1 className="mt-2 text-3xl font-bold tracking-tight">{dossier.adresse}</h1>
       <p className="mt-1 text-sm text-ct-gris">

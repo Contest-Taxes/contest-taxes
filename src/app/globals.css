@@ -45,10 +45,10 @@ body {
   overflow-x: clip; /* les sections pleine largeur (calc(50% - 50vw)) ne doivent pas créer de défilement horizontal */
 }
 
-/* Conteneur des pages : la largeur de lecture, centrée. Les bandeaux pleine largeur
+/* Conteneur des pages : 80rem (1280 px), centré ; la prose longue se limite à 64rem à l'intérieur. Les bandeaux pleine largeur
    (accueil) se placent hors de lui. */
 @utility conteneur {
-  max-width: 64rem;
+  max-width: 80rem;
   margin-left: auto;
   margin-right: auto;
   padding: 2rem 1.5rem;

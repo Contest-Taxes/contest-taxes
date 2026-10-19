@@ -32,7 +32,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <NavBar />
           <main>{children}</main>
           <footer className="mt-20 bg-ct-encre text-ct-clair">
-            <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-4 px-6 py-8 text-sm">
+            <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-6 py-8 text-sm">
               <div className="flex items-center gap-2">
                 <Image src="/logo-icone.png" alt="" width={28} height={22} className="h-6 w-auto" />
                 <span>© {new Date().getFullYear()} Contest-Taxes, {T.pied.droits.toLowerCase()}</span>

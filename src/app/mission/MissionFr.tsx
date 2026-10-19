@@ -80,7 +80,7 @@ const PARA = 'text-justify leading-relaxed text-ct-gris hyphens-auto';
 
 export default function MissionFr() {
   return (
-    <article>
+    <article className="max-w-5xl">
       <div className="flex items-center gap-4">
         <Image src="/logo-icone.png" alt="" width={72} height={56} className="h-14 w-auto" />
         <h1 className="text-3xl font-bold tracking-tight">Notre mission</h1>

@@ -59,6 +59,17 @@ export interface CouvertureSql {
   immeubles?: number;
 }
 
+/** Immeuble tiré au hasard pour la carte « En une seconde » de l'accueil (pretri_exemple). */
+export interface ExempleSql {
+  adresse: string;
+  ville: string;
+  hausse_pct: number;
+  mediane_pct: number;
+  n_comparables: number;
+  /** Taxes annuelles que représente chaque pourcent de hausse, au taux de l'immeuble. */
+  cout_pourcent: number | null;
+}
+
 export interface TauxSql {
   annee: number;
   /** En % de la valeur (= $ par 100 $ d'évaluation). */

@@ -1,7 +1,7 @@
 import { unstable_cache } from 'next/cache';
 import PretriForm from '@/components/PretriForm';
 import { getSupabaseServeur } from '@/lib/supabaseServer';
-import type { CouvertureSql } from '@/lib/pretri/types';
+import type { CouvertureSql, ExempleSql } from '@/lib/pretri/types';
 import { langueServeur } from '@/lib/i18n/serveur';
 import { t } from '@/lib/i18n/textes';
 
@@ -23,6 +23,18 @@ const chargerCouverture = unstable_cache(
   { revalidate: 3600 },
 );
 
+// Exemple de la carte « En une seconde » : un immeuble de Montréal tiré au
+// hasard à chaque ouverture de la page (maisons et plex dans la norme).
+async function chargerExemple(): Promise<ExempleSql | null> {
+  try {
+    const { data, error } = await getSupabaseServeur().rpc('pretri_exemple', { p_ville: '66023' });
+    if (error || !data) return null;
+    return data as ExempleSql;
+  } catch {
+    return null;
+  }
+}
+
 function Carte({ numero, titre, children, langue }: { numero: string; titre: string; children: React.ReactNode; langue: string }) {
   return (
     <div className="flex flex-col gap-2.5 rounded-2xl bg-ct-fond p-7">
@@ -36,10 +48,10 @@ function Carte({ numero, titre, children, langue }: { numero: string; titre: str
 export default async function Home() {
   const langue = await langueServeur();
   const T = t(langue).accueil;
-  const couverture = await chargerCouverture();
+  const [couverture, exemple] = await Promise.all([chargerCouverture(), chargerExemple()]);
   return (
     <div>
-      <PretriForm couverture={couverture} />
+      <PretriForm couverture={couverture} exemple={exemple} />
       <div className="conteneur">
       <section className="grid gap-6 sm:grid-cols-3">
         <Carte numero="01" titre={T.carte1t} langue={langue}>{T.carte1}</Carte>

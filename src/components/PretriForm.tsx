@@ -1,6 +1,6 @@
 'use client';
 import { FormEvent, ReactNode, useState } from 'react';
-import type { CouvertureSql, GroupeSql, Verdict } from '@/lib/pretri/types';
+import type { CouvertureSql, ExempleSql, GroupeSql, Verdict } from '@/lib/pretri/types';
 import CourbeSigma, { COMPS, legendeSigma, formaterUneSur, partObservee, uneSur } from '@/components/CourbeSigma';
 import CourbeHistorique from '@/components/CourbeHistorique';
 import { useLangue } from '@/lib/i18n/LangueProvider';
@@ -121,7 +121,7 @@ function PanneauSigma({ ecart, histo, superposer, setSuperposer, langue }: {
   );
 }
 
-export default function PretriForm({ couverture }: { couverture: CouvertureSql[] }) {
+export default function PretriForm({ couverture, exemple }: { couverture: CouvertureSql[]; exemple: ExempleSql | null }) {
   const { langue } = useLangue();
   const T = t(langue).formulaire;
   const TA = t(langue).accueil;
@@ -217,14 +217,20 @@ export default function PretriForm({ couverture }: { couverture: CouvertureSql[]
   const fr = langue === 'fr';
   const libelleRole = (c: CouvertureSql) => (c.role_libelle ? `${TA.role} ${c.role_libelle}` : `${TA.millesime} ${c.millesime}`);
   const badges = couverture.length ? couverture : [{ ville: '66023', nom: 'Montréal', millesime: 2026, role_libelle: '2026-2027-2028', apercu: false, note: null }];
-  const CHIFFRES_EXEMPLE = fr
-    ? [['Votre hausse', '+1,0 %'], ['Médiane des comparables', '+5,0 %'], ['Bâtiments comparés', '92'], ['Un point de hausse', '96 $ / an']]
-    : [['Your increase', '+1.0%'], ['Median of the comparables', '+5.0%'], ['Buildings compared', '92'], ['One point of increase', '$96 / yr']];
+  const dollarsAn = (v: number) => (fr ? `${nombre(v)} $ / an` : `$${nombre(v)} / yr`);
+  const CHIFFRES_EXEMPLE: [string, string][] = exemple
+    ? [
+        [fr ? 'Hausse de l’immeuble' : 'Building’s increase', pct(exemple.hausse_pct)],
+        [fr ? 'Médiane des comparables' : 'Median of the comparables', pct(exemple.mediane_pct)],
+        [fr ? 'Bâtiments comparés' : 'Buildings compared', nombre(exemple.n_comparables)],
+        [fr ? 'Chaque % de hausse' : 'Each 1% of increase', exemple.cout_pourcent != null ? dollarsAn(exemple.cout_pourcent) : '—'],
+      ]
+    : [];
 
   return (
     <div>
       <section className="bg-ct-encre px-6 pb-16 pt-12 text-white">
-        <div className="mx-auto grid max-w-5xl gap-8 lg:grid-cols-12 lg:items-start">
+        <div className="mx-auto grid max-w-7xl gap-8 lg:gap-12 lg:grid-cols-12 lg:items-start">
           <div className="flex flex-col gap-4 lg:col-span-7">
             <div className="flex flex-wrap gap-2">
               {badges.map((c) => (
@@ -262,17 +268,24 @@ export default function PretriForm({ couverture }: { couverture: CouvertureSql[]
           </div>
           <aside className="flex flex-col gap-3.5 rounded-2xl border border-white/15 bg-white/[0.06] p-6 lg:col-span-5" aria-label={fr ? 'Ce que vous obtenez' : 'What you get'}>
             <p className="text-xs font-semibold uppercase tracking-[0.1em] text-[#9fd3a3]">{fr ? 'En une seconde' : 'In one second'}</p>
-            <div className="grid grid-cols-2 gap-3.5">
-              {CHIFFRES_EXEMPLE.map(([k, v]) => (
-                <div key={k} className="rounded-xl bg-white/[0.06] p-3.5">
-                  <p className="text-xs text-[#b7bfba]">{k}</p>
-                  <p className="mt-1 whitespace-nowrap font-display text-[28px] leading-none text-white sm:text-[32px]">{v}</p>
-                </div>
-              ))}
-            </div>
+            {CHIFFRES_EXEMPLE.length > 0 && (
+              <div className="grid grid-cols-2 gap-3.5">
+                {CHIFFRES_EXEMPLE.map(([k, v]) => (
+                  <div key={k} className="rounded-xl bg-white/[0.06] p-3.5">
+                    <p className="text-xs text-[#b7bfba]">{k}</p>
+                    <p className="mt-1 whitespace-nowrap font-display text-[28px] leading-none text-white sm:text-[32px]">{v}</p>
+                  </div>
+                ))}
+              </div>
+            )}
             <p className="text-[13px] leading-relaxed text-[#c9cfcb]">
-              {fr ? 'Exemple : le 1482 rue Marie-Anne Est, à Montréal. Le verdict complet, les comparables retenus et la lecture de l’écart s’affichent sous la barre de recherche.'
-                  : 'Example: 1482 rue Marie-Anne Est, in Montréal. The full verdict, the comparables retained and the reading of the deviation appear under the search bar.'}
+              {exemple
+                ? (fr
+                    ? <>Exemple tiré au hasard parmi les immeubles de {exemple.ville} : le <strong className="font-semibold text-white">{exemple.adresse}</strong>. Entrez votre adresse : le verdict, les comparables retenus et la lecture de l’écart s’affichent sous la barre de recherche.</>
+                    : <>Example drawn at random among the buildings of {exemple.ville}: <strong className="font-semibold text-white">{exemple.adresse}</strong>. Enter your address: the verdict, the comparables retained and the reading of the deviation appear under the search bar.</>)
+                : (fr
+                    ? 'Entrez votre adresse : la hausse de votre immeuble, la médiane de ses comparables, leur nombre et ce que chaque pourcent de hausse représente en taxes s’affichent sous la barre de recherche.'
+                    : 'Enter your address: your building’s increase, the median of its comparables, how many there are and what each 1% of increase represents in taxes appear under the search bar.')}
             </p>
           </aside>
         </div>
@@ -347,17 +360,17 @@ export default function PretriForm({ couverture }: { couverture: CouvertureSql[]
 
             {verdict.enjeu && verdict.taux && (
               <div className="border-t border-ct-ligne pt-3.5">
-                <p className="text-sm leading-relaxed text-[#3a403d]">
+                <p className="leading-relaxed">
                   {verdict.enjeu}
                   <sup className="ml-px text-[0.7em] leading-none"><a href="#note-taux" className="text-ct-vert hover:underline">1</a></sup>
                 </p>
                 {verdict.frais_texte && verdict.frais && (
-                  <p className="mt-2 text-sm leading-relaxed text-[#3a403d]">
+                  <p className="mt-2 leading-relaxed">
                     {verdict.frais_texte}
                     <sup className="ml-px text-[0.7em] leading-none"><a href="#note-frais" className="text-ct-vert hover:underline">2</a></sup>
                   </p>
                 )}
-                <p id="note-taux" className="mt-2 text-xs leading-relaxed text-gray-500">
+                <p id="note-taux" className="mt-3 text-xs leading-relaxed text-gray-500">
                   1. {T.noteTaux}{' '}
                   <a href={verdict.taux.source_url} target="_blank" rel="noopener noreferrer" className="underline decoration-ct-ligne underline-offset-2 hover:text-ct-encre">{verdict.taux.source_libelle}</a>
                   . {verdict.taux.niveau === 'arrondissement' ? T.deArr : T.deMun} {T.noteTauxSuite}
@@ -372,7 +385,7 @@ export default function PretriForm({ couverture }: { couverture: CouvertureSql[]
               </div>
             )}
 
-            {verdict.reserve && <p className="border-t border-ct-ligne pt-3.5 text-sm leading-relaxed text-[#3a403d]">{verdict.reserve}</p>}
+            {verdict.reserve && <p className="border-t border-ct-ligne pt-3.5 leading-relaxed">{verdict.reserve}</p>}
 
             {verdict.historique.length >= 1 && (
               <div className="border-t border-ct-ligne pt-3.5">

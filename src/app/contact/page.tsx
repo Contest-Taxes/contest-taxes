@@ -15,7 +15,7 @@ export default async function Page() {
   const langue = await langueServeur();
   const T = t(langue).contact;
   return (
-    <section className="conteneur max-w-2xl">
+    <div className="conteneur"><section className="max-w-2xl">
       <h1 className="text-3xl font-bold tracking-tight">{T.titre}</h1>
       <p className="mt-4 leading-relaxed">
         {T.intro1}{' '}
@@ -26,6 +26,6 @@ export default async function Page() {
         {T.dossier1} <a href="/dashboard" className="underline">{T.dossier2}</a>.
       </p>
       <ContactForm />
-    </section>
+    </section></div>
   );
 }

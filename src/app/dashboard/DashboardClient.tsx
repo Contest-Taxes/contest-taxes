@@ -15,7 +15,7 @@ import { fmtDate, t } from '@/lib/i18n/textes';
 
 export default function DashboardClient() {
   return (
-    <Suspense fallback={<main className="max-w-3xl">…</main>}>
+    <Suspense fallback={<main className="max-w-5xl">…</main>}>
       <Tableau />
     </Suspense>
   );
@@ -135,10 +135,10 @@ function Tableau() {
     router.push('/');
   }
 
-  if (!session) return <main className="max-w-3xl">…</main>;
+  if (!session) return <main className="max-w-5xl">…</main>;
 
   return (
-    <main className="max-w-3xl">
+    <main className="max-w-5xl">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">{T.mesDossiers}</h1>

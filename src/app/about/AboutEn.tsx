@@ -64,7 +64,7 @@ function Appel({ n }: { n: number }) {
 
 export default function AboutEn() {
   return (
-    <article>
+    <article className="max-w-5xl">
       <div className="flex items-center gap-4">
         <Image src="/logo-icone.png" alt="" width={72} height={56} className="h-14 w-auto" />
         <h1 className="text-3xl font-bold tracking-tight">About us</h1>
