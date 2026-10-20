@@ -216,7 +216,21 @@ export default function PretriForm({ couverture, exemple }: { couverture: Couver
   };
   const fr = langue === 'fr';
   const libelleRole = (c: CouvertureSql) => (c.role_libelle ? `${TA.role} ${c.role_libelle}` : `${TA.millesime} ${c.millesime}`);
-  const badges = couverture.length ? couverture : [{ ville: '66023', nom: 'Montréal', millesime: 2026, role_libelle: '2026-2027-2028', apercu: false, note: null }];
+  const liste = couverture.length ? couverture : [{ ville: '66023', nom: 'Montréal', millesime: 2026, role_libelle: '2026-2027-2028', apercu: false, note: null }];
+  // Agglomération de Montréal (région 66 du MAMH) : une seule pastille pour ses villes,
+  // la liste complète sous la barre de recherche (Guillaume, 2026-10-20).
+  const agglo = liste.filter((c) => c.ville.startsWith('66'));
+  const nomsAgglo = agglo.map((c) => c.nom).sort((x, y) => x.localeCompare(y, 'fr'));
+  const badges: (CouvertureSql & { titre?: string })[] = [
+    ...(agglo.length > 1
+      ? [{ ...agglo.find((c) => c.ville === '66023')!, ville: 'agglo', apercu: agglo.every((c) => c.apercu),
+           nom: fr ? `Agglomération de Montréal · ${agglo.length} villes` : `Montréal agglomeration · ${agglo.length} cities`,
+           titre: nomsAgglo.join(', ') }]
+      : agglo),
+    ...liste.filter((c) => !c.ville.startsWith('66')),
+  ];
+  const et = fr ? ' et ' : ' and ';
+  const listeAgglo = nomsAgglo.length > 1 ? nomsAgglo.slice(0, -1).join(', ') + et + nomsAgglo[nomsAgglo.length - 1] : nomsAgglo.join('');
   const dollarsAn = (v: number) => (fr ? `${nombre(v)} $ / an` : `$${nombre(v)} / yr`);
   const CHIFFRES_EXEMPLE: [string, string][] = exemple
     ? [
@@ -234,7 +248,7 @@ export default function PretriForm({ couverture, exemple }: { couverture: Couver
           <div className="flex flex-col gap-4 lg:col-span-7">
             <div className="flex flex-wrap gap-2">
               {badges.map((c) => (
-                <p key={c.ville} className="inline-flex items-center gap-2 rounded-full border border-white/30 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#e6ebe7]">
+                <p key={c.ville} className="inline-flex items-center gap-2 rounded-full border border-white/30 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#e6ebe7]" title={c.titre}>
                   <span className={`h-1.5 w-1.5 rounded-full ${c.apercu ? 'bg-[#f2b44c]' : 'bg-[#6fcf74]'}`} aria-hidden="true" />
                   {c.nom} · {c.apercu ? `${TA.apercu}, ` : ''}{libelleRole(c)}
                 </p>
@@ -265,6 +279,11 @@ export default function PretriForm({ couverture, exemple }: { couverture: Couver
               </button>
             </form>
             <p className="text-sm text-[#b7bfba]">{T.aide}</p>
+            {agglo.length > 1 && (
+              <p className="text-sm text-[#b7bfba]">
+                {fr ? 'Agglomération de Montréal : ' : 'Montréal agglomeration: '}{listeAgglo}.
+              </p>
+            )}
           </div>
           <aside className="flex flex-col gap-3.5 rounded-2xl border border-white/15 bg-white/[0.06] p-6 lg:col-span-5" aria-label={fr ? 'Ce que vous obtenez' : 'What you get'}>
             <p className="text-xs font-semibold uppercase tracking-[0.1em] text-[#9fd3a3]">{fr ? 'En une seconde' : 'In one second'}</p>
