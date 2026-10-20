@@ -399,6 +399,13 @@ export default function PretriForm({ couverture, exemple }: { couverture: Couver
                     2. {T.noteFrais}{' '}
                     <a href={verdict.frais.source_url} target="_blank" rel="noopener noreferrer" className="underline decoration-ct-ligne underline-offset-2 hover:text-ct-encre">{verdict.frais.source_libelle}</a>
                     . {T.noteFraisSuite}
+                    {verdict.frais_agglomeration && (
+                      <>
+                        {' '}{T.noteAgglo} (
+                        <a href={T.noteAggloUrl} target="_blank" rel="noopener noreferrer" className="underline decoration-ct-ligne underline-offset-2 hover:text-ct-encre">{T.noteAggloLoi}</a>
+                        ).
+                      </>
+                    )}
                   </p>
                 )}
               </div>

@@ -195,6 +195,7 @@ export function DocumentAnalyse({ verdict: v, adresse, langue, logo, genereLe }:
     limite2: 'Cette analyse compare des valeurs inscrites au rôle, pas des prix de vente, et n’ajuste ni pour l’âge ni pour l’état. Elle n’est pas une évaluation professionnelle.',
     suiteTexte: 'Une demande de révision s’appuie sur les prix de vente de propriétés comparables, pas sur les valeurs au rôle des voisins : les municipalités l’indiquent elles-mêmes. C’est l’analyse que fait le rapport complet, à partir des ventes du secteur. Pour aller plus loin : contest-taxes.ca.',
     sourceTaux: 'Source du taux :', sourceFrais: 'Source des frais :',
+    sourceAgglo: 'Pour toutes les villes de l’agglomération, la Ville de Montréal est l’organisme responsable de l’évaluation : la demande de révision se dépose auprès d’elle (Loi sur l’exercice de certaines compétences municipales dans certaines agglomérations, art. 21, https://www.legisquebec.gouv.qc.ca/fr/document/lc/E-20.001#se:21).',
     pied: 'Contest-Taxes · contest-taxes.ca · Analyse statistique des évaluations foncières · Pas une évaluation professionnelle',
     page: (p: number, t: number) => `page ${p} de ${t}`,
     vous: '← vous',
@@ -210,6 +211,7 @@ export function DocumentAnalyse({ verdict: v, adresse, langue, logo, genereLe }:
     limite2: 'This analysis compares values entered on the roll, not sale prices, and adjusts neither for age nor for condition. It is not a professional appraisal.',
     suiteTexte: 'An application for review rests on the sale prices of comparable properties, not on the neighbours’ roll values: municipalities say so themselves. That is the analysis the full report performs, from the sales in the sector. To go further: contest-taxes.ca.',
     sourceTaux: 'Rate source:', sourceFrais: 'Fee source:',
+    sourceAgglo: 'For every city in the agglomeration, the City of Montréal is the body responsible for assessment, so the application for review is filed with it (Act respecting the exercise of certain municipal powers in certain urban agglomerations, s. 21, https://www.legisquebec.gouv.qc.ca/en/document/cs/E-20.001#se:21).',
     pied: 'Contest-Taxes · contest-taxes.ca · Statistical analysis of property assessments · Not a professional appraisal',
     page: (p: number, t: number) => `page ${p} of ${t}`,
     vous: '← you',
@@ -301,8 +303,9 @@ export function DocumentAnalyse({ verdict: v, adresse, langue, logo, genereLe }:
             <Text style={S.h2}>{num()}{T.taxes}</Text>
             {v.enjeu ? <Text style={S.p}>{n(v.enjeu)}</Text> : null}
             {v.frais_texte ? <Text style={S.p}>{n(v.frais_texte)}</Text> : null}
-            {v.taux && <Text style={S.petit}>{T.sourceTaux} {v.taux.source_libelle}, {v.taux.source_url}</Text>}
-            {v.frais && <Text style={S.petit}>{T.sourceFrais} {v.frais.source_libelle}, {v.frais.source_url}</Text>}
+            {v.taux && <Text style={S.petit}>{`${T.sourceTaux} ${v.taux.source_libelle}, ${v.taux.source_url}`}</Text>}
+            {v.frais && <Text style={S.petit}>{`${T.sourceFrais} ${v.frais.source_libelle}, ${v.frais.source_url}`}</Text>}
+            {v.frais && v.frais_agglomeration && <Text style={S.petit}>{T.sourceAgglo}</Text>}
           </View>
         )}
 

@@ -170,4 +170,6 @@ export interface Verdict {
   /** Frais de dépôt d'une demande de révision, rapportés au coût d'un point. */
   frais_texte: string;
   frais: FraisSql | null;
+  /** Ville reconstituée de l'agglomération de Montréal : la demande se dépose auprès de Montréal (E-20.001, art. 21). */
+  frais_agglomeration: boolean;
 }

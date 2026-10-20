@@ -194,6 +194,7 @@ function base(r: ResultatSql, categorie: Categorie): Verdict {
     taux: r.pretri?.taux ?? null,
     frais_texte: '',
     frais: r.pretri?.frais ?? null,
+    frais_agglomeration: Boolean(r.pretri?.frais && r.unite?.ville?.startsWith('66') && r.unite.ville !== '66023'),
     couverture: r.couverture ?? null,
   };
 }
