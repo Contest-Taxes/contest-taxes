@@ -5,17 +5,17 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import type { Session } from '@supabase/supabase-js';
 import { getSupabase } from '@/lib/supabaseClient';
 import type { Verdict } from '@/lib/pretri/types';
-import { STYLE_STATUT, type Dossier, type Rapport } from '@/lib/espace/types';
+import { STYLE_STATUT, type Dossier } from '@/lib/espace/types';
 import { useLangue } from '@/lib/i18n/LangueProvider';
 import { fmtDate, t } from '@/lib/i18n/textes';
 import Bandeau from '@/components/espace/Bandeau';
 import AvisRoleClos from '@/components/espace/AvisRoleClos';
-import { echeanceRevision } from '@/lib/pretri/echeance';
 
 // Tableau de bord du client (planche « Espace client : mes dossiers ») :
-// bandeau d'encre, dossiers en cartes à liseré par statut, ouverture d'un
-// dossier à partir d'une adresse vérifiée par l'analyse préliminaire, et la
-// liste de tous les rapports déposés, avec leur langue.
+// bandeau d'encre, puis en haut l'ouverture d'un dossier à partir d'une
+// adresse vérifiée par l'analyse préliminaire (avec l'avertissement quand le
+// délai de révision du rôle est passé), puis les dossiers en cartes à liseré
+// par statut. Les rapports se téléchargent depuis la page de chaque dossier.
 
 interface DossierListe extends Dossier {
   dossier_ventes: { count: number }[];
@@ -43,7 +43,6 @@ function Tableau() {
   const [nom, setNom] = useState<string | null>(null);
   const [admin, setAdmin] = useState(false);
   const [dossiers, setDossiers] = useState<DossierListe[] | null>(null);
-  const [rapports, setRapports] = useState<Rapport[]>([]);
   const [erreur, setErreur] = useState<string | null>(null);
 
   const [adresse, setAdresse] = useState(adresseParam);
@@ -69,11 +68,6 @@ function Tableau() {
       .select('id, adresse, ville, statut, cree_le, maj_le, rapport_chemin, dossier_ventes(count), dossier_rapports(langue)')
       .order('cree_le', { ascending: false });
     if (error) setErreur(error.message); else setDossiers(data as unknown as DossierListe[]);
-    const { data: r } = await supabase
-      .from('dossier_rapports')
-      .select('id, dossier_id, langue, chemin, nom_fichier, annee, depose_le, dossiers(adresse)')
-      .order('depose_le', { ascending: false });
-    setRapports((r as unknown as Rapport[]) ?? []);
     const { data: p } = await supabase.from('profils').select('role, nom').eq('id', session.user.id).maybeSingle();
     setAdmin(p?.role === 'admin');
     setNom(p?.nom ?? null);
@@ -125,12 +119,6 @@ function Tableau() {
     else router.push(`/dashboard/dossier/${data.id}`);
   }
 
-  async function telecharger(r: Rapport) {
-    const { data, error } = await supabase.storage.from('rapports').createSignedUrl(r.chemin, 600, { download: r.nom_fichier });
-    if (error || !data) { setErreur(error?.message ?? TF.erreur); return; }
-    window.open(data.signedUrl, '_blank', 'noopener');
-  }
-
   async function deconnecter() {
     await supabase.auth.signOut();
     router.push('/');
@@ -140,7 +128,6 @@ function Tableau() {
 
   // Rôle de l'immeuble vérifié : son délai de révision peut être passé.
   const roleVerifie = verdict?.unite ? (verdict.couverture?.role_libelle ?? verdict.chiffres?.role_libelle ?? null) : null;
-  const echeance = echeanceRevision(roleVerifie);
 
   const langues = (ls: { langue: 'fr' | 'en' }[]) =>
     Array.from(new Set(ls.map((l) => l.langue))).map((l) => (l === 'fr' ? T.enFrancais : T.enAnglais)).join(` ${T.et} `);
@@ -163,31 +150,7 @@ function Tableau() {
       <div className="conteneur flex flex-col gap-10">
         {erreur && <p role="alert" className="rounded-xl border border-red-200 bg-ct-rouge-pale p-3 text-sm text-ct-rouge">{erreur}</p>}
 
-        {verdict?.unite && <AvisRoleClos roleLibelle={roleVerifie} ville={verdict.couverture?.nom} />}
-
-        <section aria-label={T.mesDossiers} className="flex flex-col gap-3">
-          {dossiers === null && <p className="text-ct-gris">{T.lecture}</p>}
-          {dossiers?.length === 0 && <p className="rounded-2xl border border-ct-ligne bg-white p-6 text-ct-gris">{T.aucun}</p>}
-          {dossiers?.map((d) => {
-            const st = STYLE_STATUT[d.statut] ?? STYLE_STATUT.nouveau;
-            const nVentes = d.dossier_ventes?.[0]?.count ?? 0;
-            return (
-              <Link key={d.id} href={`/dashboard/dossier/${d.id}`}
-                className={`flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-ct-ligne border-l-[6px] bg-white px-6 py-5 shadow-[0_10px_30px_rgba(30,34,35,0.05)] transition hover:border-ct-vert ${st.lisere}`}>
-                <div className="min-w-0">
-                  <p className="font-display text-[22px] font-medium">{d.adresse}</p>
-                  <p className="mt-1 text-sm text-ct-gris">
-                    {T.ouvertLe} {fmtDate(langue, d.cree_le)} · {nVentes} {nVentes > 1 ? T.ventes : T.vente} {T.ventesFournies}
-                    {d.dossier_rapports?.length > 0 && ` · ${T.rapportDeposeEn} ${langues(d.dossier_rapports)}`}
-                  </p>
-                </div>
-                <span className={`rounded-full px-3.5 py-1.5 text-sm font-semibold ${st.pastille}`}>{T.statuts[d.statut] ?? d.statut}</span>
-              </Link>
-            );
-          })}
-        </section>
-
-        <section id="nouveau" aria-labelledby="titre-nouveau" className="flex flex-col gap-2.5 rounded-2xl bg-ct-fond px-8 py-7">
+        <section id="nouveau" aria-labelledby="titre-nouveau" className="flex flex-col gap-2.5 rounded-2xl bg-ct-fond px-5 py-7 sm:px-8">
           <h2 id="titre-nouveau" className="font-display text-[26px] font-medium">{T.ouvrir}</h2>
           <p className="text-sm text-ct-gris">{T.ouvrirNote}</p>
           <form onSubmit={(e) => { e.preventDefault(); if (adresse.trim()) verifier(adresse.trim()); }} className="mt-1.5 flex flex-col gap-2.5 sm:flex-row">
@@ -199,7 +162,7 @@ function Tableau() {
             </button>
           </form>
           {verdict && (
-            <div className="mt-3 rounded-xl border border-ct-ligne bg-white p-5">
+            <div className="mt-3 rounded-xl border border-ct-ligne bg-white p-4 sm:p-5">
               {verdict.unite ? (
                 <>
                   <p className="text-sm text-ct-gris">{T.immeubleTrouve}</p>
@@ -209,7 +172,7 @@ function Tableau() {
                     <p className="mt-2 text-sm text-ct-rouge">{verdict.message}</p>
                   ) : (
                     <>
-                    {echeance?.passee && <p className="mt-2 text-sm font-semibold text-[#8a4b08]">{T.avisClosCourt(echeance.annee)}</p>}
+                    <AvisRoleClos roleLibelle={roleVerifie} ville={verdict.couverture?.nom} niveau={3} className="mt-4" />
                     <button type="button" onClick={creer} disabled={creation} className="mt-4 rounded-xl bg-ct-encre px-5 py-3 font-semibold text-white transition hover:bg-black disabled:opacity-50">
                       {creation ? T.creation : T.creer}
                     </button>
@@ -233,25 +196,26 @@ function Tableau() {
           )}
         </section>
 
-        <section aria-labelledby="titre-rapports" className="flex flex-col gap-3">
-          <h2 id="titre-rapports" className="font-display text-[26px] font-medium">{T.mesRapports}</h2>
-          {rapports.length === 0 ? (
-            <p className="text-sm text-ct-gris">{T.aucunRapport}</p>
-          ) : (
-            rapports.map((r) => (
-              <div key={r.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-ct-ligne bg-white px-5 py-4">
-                <div className="flex min-w-0 flex-wrap items-center gap-3">
-                  <span className="rounded-full bg-ct-encre px-2.5 py-0.5 text-[11px] font-bold tracking-[0.08em] text-white">{r.langue.toUpperCase()}</span>
-                  <div className="min-w-0">
-                    <p className="font-semibold">{T.rapportTitre}, {r.dossiers?.adresse}</p>
-                    <p className="mt-0.5 text-[13px] text-ct-gris">{T.deposeLe.charAt(0).toUpperCase() + T.deposeLe.slice(1)} {fmtDate(langue, r.depose_le)} · {r.nom_fichier}</p>
-                  </div>
+        <section aria-label={T.mesDossiers} className="flex flex-col gap-3">
+          {dossiers === null && <p className="text-ct-gris">{T.lecture}</p>}
+          {dossiers?.length === 0 && <p className="rounded-2xl border border-ct-ligne bg-white p-6 text-ct-gris">{T.aucun}</p>}
+          {dossiers?.map((d) => {
+            const st = STYLE_STATUT[d.statut] ?? STYLE_STATUT.nouveau;
+            const nVentes = d.dossier_ventes?.[0]?.count ?? 0;
+            return (
+              <Link key={d.id} href={`/dashboard/dossier/${d.id}`}
+                className={`flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-ct-ligne border-l-[6px] bg-white px-6 py-5 shadow-[0_10px_30px_rgba(30,34,35,0.05)] transition hover:border-ct-vert ${st.lisere}`}>
+                <div className="min-w-0">
+                  <p className="font-display text-[22px] font-medium">{d.adresse}</p>
+                  <p className="mt-1 text-sm text-ct-gris">
+                    {T.ouvertLe} {fmtDate(langue, d.cree_le)} · {nVentes} {nVentes > 1 ? T.ventes : T.vente} {T.ventesFournies}
+                    {d.dossier_rapports?.length > 0 && ` · ${T.rapportDeposeEn} ${langues(d.dossier_rapports)}`}
+                  </p>
                 </div>
-                <button type="button" onClick={() => telecharger(r)} className="rounded-xl border border-ct-encre px-4.5 py-2.5 font-semibold text-ct-encre transition hover:bg-ct-fond">{T.telecharger}</button>
-              </div>
-            ))
-          )}
-          <p className="mt-1 text-[13px] text-ct-gris">{T.rapportsNote}</p>
+                <span className={`rounded-full px-3.5 py-1.5 text-sm font-semibold ${st.pastille}`}>{T.statuts[d.statut] ?? d.statut}</span>
+              </Link>
+            );
+          })}
         </section>
       </div>
     </>

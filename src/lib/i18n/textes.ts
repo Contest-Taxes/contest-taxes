@@ -85,7 +85,7 @@ const fr = {
     ouvrirNote: 'L’adresse de l’immeuble, telle qu’elle figure à votre compte de taxes. En copropriété, ajoutez le numéro d’appartement.',
     verifierImmeuble: 'Vérifier l’immeuble', recherche: 'Recherche…', immeubleTrouve: 'Immeuble trouvé', analyse: 'Analyse préliminaire :',
     creer: 'C’est bien mon immeuble, créer le dossier', creation: 'Création…',
-    mesRapports: 'Mes rapports', aucunRapport: 'Aucun rapport déposé pour l’instant.', deposeLe: 'déposé le', telecharger: 'Télécharger',
+    deposeLe: 'déposé le', telecharger: 'Télécharger',
     analysePdf: 'Analyse préliminaire (PDF)', analysePdfEnCours: 'Préparation du PDF…', analysePdfNote: 'Le premier coup d’œil, recalculé à partir du rôle en vigueur, dans la langue du site.',
     langueFr: 'Français', langueEn: 'English',
     retour: '← Mes dossiers', inexistant: 'Ce dossier n’existe pas ou ne vous appartient pas.', ouvertLeDossier: 'dossier ouvert le',
@@ -99,7 +99,6 @@ const fr = {
     surtitre: 'Espace client', etapesTitre: 'Les étapes', etapeOuvert: 'Dossier ouvert', etapeVentes: 'Ventes reçues', etapeAnalyse: 'Analyse', etapeRapport: 'Rapport disponible',
     etapeAnalyseDetail: 'terrain, équilibration, comparables', enAttente: 'en attente', aVenir: 'à venir',
     ventesFournies: 'fournies', rapportDeposeEn: 'rapport déposé', enFrancais: 'en français', enAnglais: 'en anglais', et: 'et',
-    rapportTitre: 'Rapport d’analyse', rapportsNote: 'Chaque rapport est fourni dans la langue indiquée. L’analyse préliminaire en PDF se produit depuis la page de chaque dossier.',
     afficher: 'Afficher les', autresVentes: 'autres ventes', masquer: 'Masquer',
     avisClosTitre: 'Le délai général de révision de ce rôle est passé',
     avisClosDelai: (role: string, ville: string | null | undefined, annee: number) =>
@@ -107,7 +106,6 @@ const fr = {
     avisClosLoi: 'Loi sur la fiscalité municipale, art. 130',
     avisClosLoiUrl: 'https://www.legisquebec.gouv.qc.ca/fr/document/lc/F-2.1#se:130',
     avisClosUsage: 'D’autres délais s’appliquent si l’avis d’évaluation a été expédié tardivement ou si l’inscription a été modifiée en cours de rôle (art. 131, 132 et 134). Sans demande déposée dans le délai applicable, ce rapport ne pourra pas servir à contester l’évaluation. Il permet tout de même de savoir, à partir des ventes d’immeubles semblables, si votre hausse était trop élevée.',
-    avisClosCourt: (annee: number) => `Le délai général de révision de ce rôle a pris fin le 30 avril ${annee}.`,
     statuts: { nouveau: 'Dossier ouvert', ventes_recues: 'Ventes reçues', en_analyse: 'Analyse en cours', rapport_disponible: 'Rapport disponible', ferme: 'Dossier fermé' } as Record<string, string>,
     etapes: {
       nouveau: 'Prochaine étape : déposer les ventes comparables de votre secteur, celles que la Ville vous affiche. Si vous préférez que nous les relevions, dites-le dans les notes du dossier.',
@@ -206,7 +204,7 @@ const en: typeof fr = {
     ouvrirNote: 'The address of the building, as it appears on your tax bill. For a condominium, add the unit number.',
     verifierImmeuble: 'Check the building', recherche: 'Searching…', immeubleTrouve: 'Building found', analyse: 'Preliminary analysis:',
     creer: 'This is my building, create the file', creation: 'Creating…',
-    mesRapports: 'My reports', aucunRapport: 'No report filed yet.', deposeLe: 'filed on', telecharger: 'Download',
+    deposeLe: 'filed on', telecharger: 'Download',
     analysePdf: 'Preliminary analysis (PDF)', analysePdfEnCours: 'Preparing the PDF…', analysePdfNote: 'The first look, recomputed from the current roll, in the language of the site.',
     langueFr: 'Français', langueEn: 'English',
     retour: '← My files', inexistant: 'This file does not exist or is not yours.', ouvertLeDossier: 'file opened on',
@@ -220,7 +218,6 @@ const en: typeof fr = {
     surtitre: 'Client area', etapesTitre: 'The steps', etapeOuvert: 'File opened', etapeVentes: 'Sales received', etapeAnalyse: 'Analysis', etapeRapport: 'Report available',
     etapeAnalyseDetail: 'land, equalization, comparables', enAttente: 'pending', aVenir: 'to come',
     ventesFournies: 'provided', rapportDeposeEn: 'report filed', enFrancais: 'in French', enAnglais: 'in English', et: 'and',
-    rapportTitre: 'Analysis report', rapportsNote: 'Each report is provided in the language shown. The preliminary analysis PDF is produced from the page of each file.',
     afficher: 'Show the', autresVentes: 'other sales', masquer: 'Hide',
     avisClosTitre: 'The general review deadline for this roll has passed',
     avisClosDelai: (role: string, ville: string | null | undefined, annee: number) =>
@@ -228,7 +225,6 @@ const en: typeof fr = {
     avisClosLoi: 'Act respecting municipal taxation, s. 130',
     avisClosLoiUrl: 'https://www.legisquebec.gouv.qc.ca/en/document/cs/F-2.1#se:130',
     avisClosUsage: 'Other time limits apply if the assessment notice was sent late or if the entry was modified during the roll (ss. 131, 132 and 134). Without an application filed within the applicable time limit, this report cannot be used to contest the assessment. It still shows, from the sales of similar buildings, whether your increase was too high.',
-    avisClosCourt: (annee: number) => `The general review deadline for this roll ended on April 30, ${annee}.`,
     statuts: { nouveau: 'File opened', ventes_recues: 'Sales received', en_analyse: 'Analysis under way', rapport_disponible: 'Report available', ferme: 'File closed' },
     etapes: {
       nouveau: 'Next step: submit the comparable sales of your sector, the ones the City shows you. If you would rather we collect them, say so in the file notes.',
