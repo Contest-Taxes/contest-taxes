@@ -9,6 +9,8 @@ import { STYLE_STATUT, type Dossier, type Rapport } from '@/lib/espace/types';
 import { useLangue } from '@/lib/i18n/LangueProvider';
 import { fmtDate, t } from '@/lib/i18n/textes';
 import Bandeau from '@/components/espace/Bandeau';
+import AvisRoleClos from '@/components/espace/AvisRoleClos';
+import { echeanceRevision } from '@/lib/pretri/echeance';
 
 // Tableau de bord du client (planche « Espace client : mes dossiers ») :
 // bandeau d'encre, dossiers en cartes à liseré par statut, ouverture d'un
@@ -136,6 +138,10 @@ function Tableau() {
 
   if (!session) return <div className="conteneur">…</div>;
 
+  // Rôle de l'immeuble vérifié : son délai de révision peut être passé.
+  const roleVerifie = verdict?.unite ? (verdict.couverture?.role_libelle ?? verdict.chiffres?.role_libelle ?? null) : null;
+  const echeance = echeanceRevision(roleVerifie);
+
   const langues = (ls: { langue: 'fr' | 'en' }[]) =>
     Array.from(new Set(ls.map((l) => l.langue))).map((l) => (l === 'fr' ? T.enFrancais : T.enAnglais)).join(` ${T.et} `);
 
@@ -156,6 +162,8 @@ function Tableau() {
 
       <div className="conteneur flex flex-col gap-10">
         {erreur && <p role="alert" className="rounded-xl border border-red-200 bg-ct-rouge-pale p-3 text-sm text-ct-rouge">{erreur}</p>}
+
+        {verdict?.unite && <AvisRoleClos roleLibelle={roleVerifie} ville={verdict.couverture?.nom} />}
 
         <section aria-label={T.mesDossiers} className="flex flex-col gap-3">
           {dossiers === null && <p className="text-ct-gris">{T.lecture}</p>}
@@ -200,9 +208,12 @@ function Tableau() {
                   {verdict.categorie === 'adresse_partagee' || verdict.categorie === 'appartement_inconnu' ? (
                     <p className="mt-2 text-sm text-ct-rouge">{verdict.message}</p>
                   ) : (
+                    <>
+                    {echeance?.passee && <p className="mt-2 text-sm font-semibold text-[#8a4b08]">{T.avisClosCourt(echeance.annee)}</p>}
                     <button type="button" onClick={creer} disabled={creation} className="mt-4 rounded-xl bg-ct-encre px-5 py-3 font-semibold text-white transition hover:bg-black disabled:opacity-50">
                       {creation ? T.creation : T.creer}
                     </button>
+                    </>
                   )}
                 </>
               ) : (

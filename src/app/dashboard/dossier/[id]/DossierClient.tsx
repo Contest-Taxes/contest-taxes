@@ -9,6 +9,7 @@ import { useLangue } from '@/lib/i18n/LangueProvider';
 import { fmtDate, fmtDollars, fmtPct, t } from '@/lib/i18n/textes';
 import { telechargerAnalysePdf } from '@/lib/pretri/pdfClient';
 import Bandeau from '@/components/espace/Bandeau';
+import AvisRoleClos from '@/components/espace/AvisRoleClos';
 
 // Un dossier (planche « Espace client : un dossier ») : bandeau d'encre avec
 // l'adresse, carte de statut à liseré avec les rapports et l'analyse
@@ -121,6 +122,8 @@ export default function DossierClient({ id }: { id: string }) {
 
       <div className="conteneur flex flex-col gap-7">
         {erreur && <p role="alert" className="rounded-xl border border-red-200 bg-ct-rouge-pale p-3 text-sm text-ct-rouge">{erreur}</p>}
+
+        <AvisRoleClos roleLibelle={dossier.unite?.couverture?.role_libelle ?? dossier.unite?.chiffres?.role_libelle} ville={dossier.unite?.couverture?.nom} reference={new Date(dossier.cree_le)} />
 
         <div className="grid items-start gap-6 lg:grid-cols-12">
           <section aria-labelledby="titre-statut" className={`flex flex-col gap-3.5 rounded-2xl border border-ct-ligne border-l-[6px] bg-white px-8 py-7 shadow-[0_10px_30px_rgba(30,34,35,0.06)] lg:col-span-8 ${st.lisere}`}>
